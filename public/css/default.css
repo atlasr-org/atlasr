@@ -1,0 +1,43 @@
+:root {
+    --brand-color: #000;
+    --alt-color-lighter: #fff;
+    --alt-color-light: #fee;
+    --alt-color: #000;
+}
+
+@font-face {
+    font-family: Text;
+    src: url('../font/OpenSans-regular.woff') format('woff');
+    font-weight: normal;
+    font-style: normal;
+}
+
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+html {
+    font-size: 100%;
+}
+
+body {
+    font: 1.1em/1.4em Text;
+    -webkit-font-smoothing: antialiased;
+    background: var(--alt-color-light);
+    height: 100vh;
+}
+
+main {
+    height: 100%;
+    width: 100%;
+}
+
+nav {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    width: 30%;
+    background: var(--alt-color-lighter);
+}
