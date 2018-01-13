@@ -1,2 +1,2 @@
 app:
-	elm-make source/Main.elm --output public/javascript/application.elm.js
+	elm-make source/client/Main.elm --output public/javascript/application.elm.js

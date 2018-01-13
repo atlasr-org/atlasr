@@ -1,8 +1,13 @@
 :root {
-    --brand-color: #000;
-    --alt-color-lighter: #fff;
-    --alt-color-light: #fee;
-    --alt-color: #000;
+    --brand-color      : hsla(0,   0%,   0%, 1  );
+    --alt-color-lighter: hsla(0, 100%, 100%, 1  );
+    --alt-color-light  : hsla(0, 100%,  97%, 1  );
+    --alt-color        : hsla(0, 100%,   0%, 1  );
+    --alt-color-dark   : hsla(0,   0%,  30%,  .3);
+    --spacing          : 1rem;
+    --spacing-small    : calc(var(--spacing) / 2);
+    --spacing-large    : calc(var(--spacing) * 2);
+    --border-radius    : 2px;
 }
 
 @font-face {
@@ -25,19 +30,60 @@ html {
 body {
     font: 1.1em/1.4em Text;
     -webkit-font-smoothing: antialiased;
+    min-width: 500px;
     background: var(--alt-color-light);
     height: 100vh;
 }
 
 main {
+    position: relative;
     height: 100%;
     width: 100%;
 }
 
+article {
+    position: absolute !important;
+    width: 100%;
+    height: 100%;
+}
+
 nav {
+    position: absolute;
     display: flex;
     flex-direction: column;
     height: 100%;
     width: 30%;
+    min-width: 200px;
+    padding: var(--spacing);
+}
+
+    nav[aria-expanded="true"] {
+        box-shadow: 3px 0 var(--spacing) var(--alt-color-dark);
+        background: var(--alt-color-lighter);
+    }
+
+footer {
+    position: fixed;
+    bottom: var(--spacing);
+    right: var(--spacing);
+}
+
+input {
+    -moz-appearance: none;
+    -webkit-appearance: none;
+    appearance: none;
+    all: unset;
+    padding: var(--spacing-small) var(--spacing);
+    line-height: var(--spacing-large);
+    border: 1px var(--alt-color-dark) solid;
+    border-radius: var(--border-radius);
     background: var(--alt-color-lighter);
+}
+
+@media all and (min-width: 600px) {
+    footer {
+        right: auto;
+        left: 50%;
+        transform: translateX(-50%);
+    }
 }
