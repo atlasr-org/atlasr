@@ -1,6 +1,6 @@
 module Atlasr.Main exposing (..)
 
-import MapboxGL.Ports exposing (..)
+import Map
 import Html exposing (..)
 import Html.Attributes exposing (..)
 import Html.Attributes.Aria exposing (..)
@@ -23,7 +23,7 @@ type alias Model =
 
 init : ( Model, Cmd Msg )
 init =
-    ( Model "", mapboxgl_create_map "map" )
+    ( Model "", Map.create "map" )
 
 
 view : Model -> Html Msg
@@ -57,7 +57,7 @@ update msg model =
             ( { model | search = newSearch }, Cmd.none )
 
         CreateMap elementId ->
-            ( model, mapboxgl_create_map elementId )
+            ( model, Map.create elementId )
 
 
 subscriptions : Model -> Sub Msg
