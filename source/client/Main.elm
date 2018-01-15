@@ -1,6 +1,7 @@
 module Atlasr.Main exposing (..)
 
 import Atlasr.Map as Map
+import Atlasr.MapboxGL.Options as MapOptions
 import Html exposing (..)
 import Html.Attributes exposing (..)
 import Html.Attributes.Aria exposing (..)
@@ -23,7 +24,7 @@ type alias Model =
 
 init : ( Model, Cmd Msg )
 init =
-    ( Model "", Map.create "map" )
+    ( Model "", Map.create "map" MapOptions.default )
 
 
 view : Model -> Html Msg
@@ -57,7 +58,7 @@ update msg model =
             ( { model | search = newSearch }, Cmd.none )
 
         CreateMap elementId ->
-            ( model, Map.create elementId )
+            ( model, Map.create elementId MapOptions.default )
 
 
 subscriptions : Model -> Sub Msg
