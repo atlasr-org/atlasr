@@ -1,4 +1,4 @@
-module Main exposing (..)
+module Atlasr.Main exposing (..)
 
 import MapboxGL.Ports exposing (..)
 import Html exposing (..)

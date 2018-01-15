@@ -1,6 +1,6 @@
-const app = Elm.Main.fullscreen();
+const atlasr = Elm.Atlasr.Main.fullscreen();
 
-app.ports.mapboxgl_create_map.subscribe(
+atlasr.ports.mapboxgl_create_map.subscribe(
     function (id) {
         var map = new mapboxgl.Map({
             container: id,
