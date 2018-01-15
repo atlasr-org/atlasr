@@ -1,6 +1,6 @@
 module Atlasr.Main exposing (..)
 
-import Map
+import Atlasr.Map as Map
 import Html exposing (..)
 import Html.Attributes exposing (..)
 import Html.Attributes.Aria exposing (..)
