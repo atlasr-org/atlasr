@@ -48,7 +48,6 @@ view model =
 
 type Msg
     = Search String
-    | CreateMap String
 
 
 update : Msg -> Model -> ( Model, Cmd Msg )
@@ -56,9 +55,6 @@ update msg model =
     case msg of
         Search newSearch ->
             ( { model | search = newSearch }, Cmd.none )
-
-        CreateMap elementId ->
-            ( model, Map.create elementId MapOptions.default )
 
 
 subscriptions : Model -> Sub Msg
