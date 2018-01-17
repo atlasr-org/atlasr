@@ -97,7 +97,6 @@ article {
     position: absolute !important;
     width: 100vw;
     height: 100vh;
-    background: linear-gradient(90deg, red 50%, white 50%);
     transform: translateX(0);
     transition: var(--transition-duration) transform ease-in-out;
 }
