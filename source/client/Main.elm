@@ -37,11 +37,21 @@ view model =
                 "true"
     in
         main_ []
-            [ article [ id "map" ] []
-            , nav
+            [ nav
                 [ ariaExpanded expandedNav ]
-                [ input [ type_ "search", onInput Search ] []
+                [ Html.form [ role "search" ]
+                    [ input
+                        [ type_ "search"
+                        , onInput Search
+                        , ariaLabel "Search in the world"
+                        , ariaRequired True
+                        , placeholder "Search in the world"
+                        ]
+                        []
+                    ]
+                , section [] []
                 ]
+            , article [ id "map" ] []
             , footer [] [ text "Atlasr" ]
             ]
 

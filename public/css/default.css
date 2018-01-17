@@ -1,13 +1,34 @@
 :root {
-    --brand-color      : hsla(0,   0%,   0%, 1  );
-    --alt-color-lighter: hsla(0, 100%, 100%, 1  );
-    --alt-color-light  : hsla(0, 100%,  97%, 1  );
-    --alt-color        : hsla(0, 100%,   0%, 1  );
-    --alt-color-dark   : hsla(0,   0%,  30%,  .3);
-    --spacing          : 1rem;
-    --spacing-small    : calc(var(--spacing) / 2);
-    --spacing-large    : calc(var(--spacing) * 2);
-    --border-radius    : 2px;
+    --brand-color        : hsla(0,   0%,   0%, 1  );
+    --alt-color-lighter  : hsla(0, 100%, 100%, 1  );
+    --alt-color-light    : hsla(0, 100%,  97%, 1  );
+    --alt-color          : hsla(0, 100%,   0%, 1  );
+    --alt-color-dark     : hsla(0,   0%,  30%,  .3);
+    --spacing            : 1rem;
+    --spacing-small      : calc(var(--spacing) / 2);
+    --spacing-large      : calc(var(--spacing) * 2);
+    --border-radius      : 2px;
+    --transition-duration: .1s;
+
+    --panel-width                   : 100vw;
+    --panel-height                  : 70vh;
+    --panel-min-width               : auto;
+    --panel-unexpanded-translate-x  : 0%;
+    --panel-unexpanded-translate-y  : -100%;
+    --panel-expanded-map-translate-x: 0%;
+    --panel-expanded-map-translate-y: 35%;
+}
+
+@media all and (min-width: 600px) {
+    :root {
+        --panel-width                   : 30vw;
+        --panel-height                  : 100vh;
+        --panel-min-width               : 300px;
+        --panel-unexpanded-translate-x  : -100%;
+        --panel-unexpanded-translate-y  : 0%;
+        --panel-expanded-map-translate-x: 15vw;;
+        --panel-expanded-map-translate-y: 0%;
+    }
 }
 
 @font-face {
@@ -18,7 +39,7 @@
 }
 
 * {
-    box-sizing: border-box;
+    box-sizing: border-box !important;
     margin: 0;
     padding: 0;
 }
@@ -30,36 +51,61 @@ html {
 body {
     font: 1.1em/1.4em Text;
     -webkit-font-smoothing: antialiased;
-    min-width: 500px;
     background: var(--alt-color-light);
     height: 100vh;
 }
 
 main {
     position: relative;
-    height: 100%;
-    width: 100%;
+    width: 100vw;
+    height: 100vh;
+    overflow: hidden;
 }
+
+nav > form[role="search"] {
+    position: fixed;
+    top: var(--spacing);
+    padding: 0 var(--spacing);
+    width: var(--panel-width);
+    min-width: var(--panel-min-width);
+    z-index: 2;
+}
+
+nav > section {
+    z-index: 1;
+    position: absolute;
+    width: var(--panel-width);
+    min-width: var(--panel-min-width);
+    height: var(--panel-height);
+    padding: var(--spacing);
+    display: flex;
+    flex-direction: column;
+    background: var(--alt-color-lighter);
+
+    transform:
+        translateX(var(--panel-unexpanded-translate-x))
+        translateY(var(--panel-unexpanded-translate-y));
+    transition: var(--transition-duration) transform ease-in-out;
+}
+
+    nav[aria-expanded="true"] > section {
+        box-shadow: 3px 0 var(--spacing) var(--alt-color-dark);
+        transform: translateX(0) translateY(0);
+    }
 
 article {
     position: absolute !important;
-    width: 100%;
-    height: 100%;
+    width: 100vw;
+    height: 100vh;
+    background: linear-gradient(90deg, red 50%, white 50%);
+    transform: translateX(0);
+    transition: var(--transition-duration) transform ease-in-out;
 }
 
-nav {
-    position: absolute;
-    display: flex;
-    flex-direction: column;
-    height: 100%;
-    width: 30%;
-    min-width: 200px;
-    padding: var(--spacing);
-}
-
-    nav[aria-expanded="true"] {
-        box-shadow: 3px 0 var(--spacing) var(--alt-color-dark);
-        background: var(--alt-color-lighter);
+    nav[aria-expanded="true"] ~ article {
+        transform:
+            translateX(var(--panel-expanded-map-translate-x))
+            translateY(var(--panel-expanded-map-translate-y));
     }
 
 footer {
@@ -69,10 +115,11 @@ footer {
 }
 
 input {
+    all: unset;
     -moz-appearance: none;
     -webkit-appearance: none;
     appearance: none;
-    all: unset;
+    width: 100%;
     padding: var(--spacing-small) var(--spacing);
     line-height: var(--spacing-large);
     border: 1px var(--alt-color-dark) solid;
