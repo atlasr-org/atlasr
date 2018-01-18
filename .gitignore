@@ -1,2 +1,4 @@
 /elm-stuff
 /public/javascript/*.elm.js
+/public/javascript/mapbox-gl.*.js
+/public/css/mapbox-gl.*.css
