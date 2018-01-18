@@ -1,13 +1,24 @@
 MAPBOX_GL_JS_VERSION=0.43.0
 
-install: install-client install-mapbox-gl-js
-uninstall: uninstall-client uninstall-client-dependencies
+install: install-server install-client install-mapbox-gl-js
+uninstall: uninstall-server uninstall-client uninstall-client-dependencies
 
 open: install
-	open public/index.html
+	cd source/server && cargo run &
+	open http://127.0.0.1:8889
 
 clean: uninstall
 .PHONY: clean
+
+###
+# Server
+###
+
+install-server:
+	cd source/server && cargo build --release
+
+uninstall-server:
+	rm -rf source/server/Cargo.lock source/server/target
 
 ###
 # Client

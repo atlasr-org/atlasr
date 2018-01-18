@@ -2,3 +2,5 @@
 /public/javascript/*.elm.js
 /public/javascript/mapbox-gl.*
 /public/css/mapbox-gl.*
+/source/server/target
+/source/server/Cargo.lock
