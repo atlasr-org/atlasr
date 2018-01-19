@@ -4,8 +4,10 @@ install: install-server install-client install-mapbox-gl-js
 uninstall: uninstall-server uninstall-client uninstall-client-dependencies
 
 open: install
-	cd source/server && cargo run &
 	open http://127.0.0.1:8889
+
+server-run: install
+	cd source/server && cargo run
 
 clean: uninstall
 .PHONY: clean
