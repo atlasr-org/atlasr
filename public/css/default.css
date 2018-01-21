@@ -1,9 +1,9 @@
 :root {
-    --brand-color        : hsla(0,   0%,   0%, 1  );
-    --alt-color-lighter  : hsla(0, 100%, 100%, 1  );
-    --alt-color-light    : hsla(0, 100%,  97%, 1  );
-    --alt-color          : hsla(0, 100%,   0%, 1  );
-    --alt-color-dark     : hsla(0,   0%,  30%,  .3);
+    --brand-color        : hsla(221,  40%,  14%, 1  );
+    --alt-color-lighter  : hsla(  9,  93%, 100%, 1  );
+    --alt-color-light    : hsla(  9,  93%,  83%, 1  );
+    --alt-color          : hsla(  9,  93%,  72%, 1  );
+    --alt-color-dark     : hsla(  9,  93%,  25%,  .7);
     --spacing            : 1rem;
     --spacing-small      : calc(var(--spacing) / 2);
     --spacing-large      : calc(var(--spacing) * 2);
@@ -49,6 +49,7 @@ html {
 }
 
 body {
+    color: var(--brand-color);
     font: 1.1em/1.4em Text;
     -webkit-font-smoothing: antialiased;
     background: var(--alt-color-light);
@@ -80,7 +81,7 @@ nav > section {
     padding: var(--spacing);
     display: flex;
     flex-direction: column;
-    background: var(--alt-color-lighter);
+    background: var(--alt-color);
 
     transform:
         translateX(var(--panel-unexpanded-translate-x))
@@ -121,7 +122,7 @@ input {
     width: 100%;
     padding: var(--spacing-small) var(--spacing);
     line-height: var(--spacing-large);
-    border: 1px var(--alt-color-dark) solid;
+    border: 1px var(--alt-color) solid;
     border-radius: var(--border-radius);
     background: var(--alt-color-lighter);
 }
