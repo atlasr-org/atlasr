@@ -31,7 +31,7 @@ public/javascript/application.elm.js:
 	elm-make source/client/Main.elm --output public/javascript/application.elm.js
 
 uninstall-client:
-	rm public/javascript/application.elm.js
+	rm -f public/javascript/application.elm.js
 
 ###
 # Client dependencies
