@@ -101,16 +101,20 @@ article {
     position: absolute !important;
     width: 100vw;
     height: 100vh;
-    transform: translateX(0);
-    transition: var(--transition-duration) transform ease-in-out;
+    background: url('../image/map-placeholder.svg') 50% 50%;
+    background-size: cover;
 }
 
-    nav[aria-expanded="true"] ~ article {
+    article > .mapboxgl-canvas-container {
+        transform: translateX(0);
+        transition: var(--transition-duration) transform ease-in-out;
+    }
+
+    nav[aria-expanded="true"] ~ article > .mapboxgl-canvas-container {
         transform:
             translateX(var(--panel-expanded-map-translate-x))
             translateY(var(--panel-expanded-map-translate-y));
     }
-
 footer {
     position: fixed;
     bottom: var(--spacing);
