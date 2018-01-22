@@ -13,6 +13,7 @@
     --panel-width                   : 100vw;
     --panel-height                  : 70vh;
     --panel-min-width               : auto;
+    --panel-max-width               : auto;
     --panel-unexpanded-translate-x  : 0%;
     --panel-unexpanded-translate-y  : -100%;
     --panel-expanded-map-translate-x: 0%;
@@ -24,6 +25,7 @@
         --panel-width                   : 30vw;
         --panel-height                  : 100vh;
         --panel-min-width               : 300px;
+        --panel-max-width               : 500px;
         --panel-unexpanded-translate-x  : -100%;
         --panel-unexpanded-translate-y  : 0%;
         --panel-expanded-map-translate-x: 15vw;;
@@ -52,7 +54,6 @@ body {
     color: var(--brand-color);
     font: 1.1em/1.4em Text;
     -webkit-font-smoothing: antialiased;
-    background: var(--alt-color-light);
     height: 100vh;
 }
 
@@ -69,6 +70,7 @@ nav > form[role="search"] {
     padding: 0 var(--spacing);
     width: var(--panel-width);
     min-width: var(--panel-min-width);
+    max-width: var(--panel-max-width);
     z-index: 2;
 }
 
@@ -77,6 +79,7 @@ nav > section {
     position: absolute;
     width: var(--panel-width);
     min-width: var(--panel-min-width);
+    max-width: var(--panel-max-width);
     height: var(--panel-height);
     padding: var(--spacing);
     display: flex;
