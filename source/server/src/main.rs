@@ -79,7 +79,7 @@ impl Service for StaticResponses {
         let path   = request.path();
 
         lazy_static! {
-            static ref REGEX: Regex = Regex::new(r"^/(javascript/|css/|font/)").unwrap();
+            static ref REGEX: Regex = Regex::new(r"^/(javascript/|css/|font/|image/)").unwrap();
         }
 
         let is_static_file = REGEX.is_match(path);
