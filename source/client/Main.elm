@@ -43,9 +43,9 @@ view model =
                     [ input
                         [ type_ "search"
                         , onInput Search
-                        , ariaLabel "Search in the world"
+                        , ariaLabel "Browse the world"
                         , ariaRequired True
-                        , placeholder "Search in the world"
+                        , placeholder "Browse the world"
                         ]
                         []
                     ]
