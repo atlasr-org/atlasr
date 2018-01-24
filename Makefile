@@ -26,11 +26,15 @@ uninstall-server:
 # Client
 ###
 
-install-client: public/javascript/application.elm.js install-client-dependencies
+install-client: public/index.html public/javascript/application.elm.js install-client-dependencies
+public/index.html:
+	cp source/client/index.html public/index.html
+	sed -i '' "s@{MAP-PLACEHOLDER.svg}@`cat public/image/map-placeholder.svg | sed -E 's/^ +//g; s/"/'"'"'/g; s/</%3c/g; s/>/%3e/g; s/\#/%23/g' | tr -d "\n"`@" public/index.html
 public/javascript/application.elm.js:
 	elm-make source/client/Main.elm --output public/javascript/application.elm.js
 
 uninstall-client:
+	rm -f public/index.html
 	rm -f public/javascript/application.elm.js
 
 ###
