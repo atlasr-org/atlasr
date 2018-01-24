@@ -38,6 +38,7 @@
     src: url('../font/OpenSans-regular.woff') format('woff');
     font-weight: normal;
     font-style: normal;
+    font-display: swap;
 }
 
 * {
@@ -52,7 +53,7 @@ html {
 
 body {
     color: var(--brand-color);
-    font: 1.1rem/1.4rem Text;
+    font: 1.1rem/1.4rem Text, system-ui, sans-serif;
     -webkit-font-smoothing: antialiased;
     height: 100vh;
 }
