@@ -1,6 +1,8 @@
 extern crate hyper;
 extern crate futures;
 extern crate regex;
+#[macro_use]
+extern crate lazy_static;
 
 use futures::Future;
 use futures::sync::oneshot;
@@ -10,31 +12,67 @@ use hyper::error::Error;
 use hyper::header::ContentLength;
 use hyper::server::{Http, Service, Request, Response};
 
-#[macro_use] extern crate lazy_static;
 use regex::Regex;
 
 use std::fs::File;
 use std::io::{self, copy};
 use std::thread;
 
-static NOTFOUND: &[u8] = b"Not Found";
+static NOT_FOUND: &[u8] = b"Not Found";
 static ROOT: &str = "../../public/";
 
-fn serve_file(f: &str) -> Box<Future<Item = Response, Error = hyper::Error>> {
-    let filename = f.to_string();
+enum ResourceKind<'a> {
+    Unknown(&'a str),
+    Html(&'a str),
+    Javascript(&'a str),
+    Css(&'a str),
+    Font(&'a str)
+}
+
+fn guess_resource_kind(path: &str) -> ResourceKind {
+    lazy_static! {
+        static ref STATIC_RESOURCE: Regex = Regex::new(r"^/static(/[a-zA-Z0-9\-]+)+(\.[a-z]+)+$").unwrap();
+        static ref HTML_FILE: Regex       = Regex::new(r"\.html$").unwrap();
+        static ref JAVASCRIPT_FILE: Regex = Regex::new(r"\.js|\.map$").unwrap();
+        static ref CSS_FILE: Regex        = Regex::new(r"\.css$").unwrap();
+        static ref FONT_FILE: Regex       = Regex::new(r"\.woff$").unwrap();
+    }
+
+    if path == "/index.html" {
+        ResourceKind::Html(path)
+    } else if STATIC_RESOURCE.is_match(path) {
+        if HTML_FILE.is_match(path) {
+            ResourceKind::Html(path)
+        } else if JAVASCRIPT_FILE.is_match(path) {
+            ResourceKind::Javascript(path)
+        } else if CSS_FILE.is_match(path) {
+            ResourceKind::Css(path)
+        } else if FONT_FILE.is_match(path) {
+            ResourceKind::Font(path)
+        } else {
+            ResourceKind::Unknown(path)
+        }
+    } else {
+        ResourceKind::Unknown(path)
+    }
+}
+
+fn serve_static_file(path: &str) -> Box<Future<Item = Response, Error = hyper::Error>> {
+    let pathname = path.to_string();
     let (tx, rx) = oneshot::channel();
 
     thread::spawn(
         move || {
-            let mut file = match File::open(filename) {
+            let mut file = match File::open(pathname) {
                 Ok(f) => f,
 
                 Err(_) => {
-                    tx.send(Response::new()
+                    tx.send(
+                        Response::new()
                             .with_status(StatusCode::NotFound)
-                            .with_header(ContentLength(NOTFOUND.len() as u64))
-                            .with_body(NOTFOUND))
-                        .expect("Send error on open");
+                            .with_header(ContentLength(NOT_FOUND.len() as u64))
+                            .with_body(NOT_FOUND)
+                    ).expect("Send error on open");
 
                     return;
                 }
@@ -44,19 +82,21 @@ fn serve_file(f: &str) -> Box<Future<Item = Response, Error = hyper::Error>> {
 
             match copy(&mut file, &mut buf) {
                 Ok(_) => {
-                    let res = Response::new()
-                        .with_header(ContentLength(buf.len() as u64))
-                        .with_body(buf);
-
                     tx
-                        .send(res)
+                        .send(
+                            Response::new()
+                                .with_header(ContentLength(buf.len() as u64))
+                                .with_body(buf)
+                        )
                         .expect("Send error on successful file read");
                 },
 
                 Err(_) => {
                     tx
-                        .send(Response::new()
-                        .with_status(StatusCode::InternalServerError))
+                        .send(
+                            Response::new()
+                                .with_status(StatusCode::InternalServerError)
+                        )
                         .expect("Send error on error reading file");
                 }
             };
@@ -75,34 +115,29 @@ impl Service for StaticResponses {
     type Future   = Box<Future<Item = Self::Response, Error = Self::Error>>;
 
     fn call(&self, request: Request) -> Self::Future {
-        let method = request.method();
-        let path   = request.path();
-
-        lazy_static! {
-            static ref REGEX: Regex = Regex::new(r"^/(javascript/|css/|font/|image/)").unwrap();
-        }
-
-        let is_static_file = REGEX.is_match(path);
-
-        match (method, path, is_static_file) {
-            (&Get, "/", _) | (&Get, "/index.html", _) => {
-                serve_file(&format!("{}{}", ROOT, "index.html"))
+        match (request.method(), guess_resource_kind(request.path())) {
+            (&Get, ResourceKind::Unknown("/")) |
+            (&Get, ResourceKind::Html("/index.html")) => {
+                serve_static_file(&format!("{}static{}", ROOT, "/index.html"))
             },
 
-            (&Get, static_file, true) => {
-                serve_file(&format!("{}{}", ROOT, static_file))
-            },
-            
+
+            (&Get, ResourceKind::Html(path)) |
+            (&Get, ResourceKind::Javascript(path)) |
+            (&Get, ResourceKind::Css(path)) |
+            (&Get, ResourceKind::Font(path)) => {
+                serve_static_file(&format!("{}{}", ROOT, path))
+            }
+
             _ => {
                 Box::new(
                     futures::future::ok(
                         Response::new().with_status(StatusCode::NotFound)
                     )
                 )
-            }
+            },
         }
     }
-
 }
 
 

@@ -26,16 +26,16 @@ uninstall-server:
 # Client
 ###
 
-install-client: public/index.html public/javascript/application.elm.js install-client-dependencies
-public/index.html:
-	cp source/client/index.html public/index.html
-	sed -i '' "s@{MAP-PLACEHOLDER.svg}@`cat public/image/map-placeholder.svg | sed -E 's/^ +//g; s/"/'"'"'/g; s/</%3c/g; s/>/%3e/g; s/\#/%23/g' | tr -d "\n"`@" public/index.html
-public/javascript/application.elm.js:
-	elm-make source/client/Main.elm --output public/javascript/application.elm.js
+install-client: public/static/index.html public/static/javascript/application.elm.js install-client-dependencies
+public/static/index.html:
+	cp source/client/index.html public/static/index.html
+	sed -i '' "s@{MAP-PLACEHOLDER.svg}@`cat public/static/image/map-placeholder.svg | sed -E 's/^ +//g; s/"/'"'"'/g; s/</%3c/g; s/>/%3e/g; s/\#/%23/g' | tr -d "\n"`@" public/static/index.html
+public/static/javascript/application.elm.js:
+	elm-make source/client/Main.elm --output public/static/javascript/application.elm.js
 
 uninstall-client:
-	rm -f public/index.html
-	rm -f public/javascript/application.elm.js
+	rm -f public/static/index.html
+	rm -f public/static/javascript/application.elm.js
 
 ###
 # Client dependencies
@@ -50,17 +50,17 @@ uninstall-client-dependencies: uninstall-mapbox-gl-js
 
 install-mapbox-gl-js: install-mapbox-gl-js-js install-mapbox-gl-js-css
 
-install-mapbox-gl-js-js: public/javascript/mapbox-gl.js public/javascript/mapbox-gl.js.map
-public/javascript/mapbox-gl.js:
-	curl -L https://api.tiles.mapbox.com/mapbox-gl-js/v$(MAPBOX_GL_JS_VERSION)/mapbox-gl.js > public/javascript/mapbox-gl.js
-public/javascript/mapbox-gl.js.map:
-	curl -L https://api.tiles.mapbox.com/mapbox-gl-js/v$(MAPBOX_GL_JS_VERSION)/mapbox-gl.js.map > public/javascript/mapbox-gl.js.map
+install-mapbox-gl-js-js: public/static/javascript/mapbox-gl.js public/static/javascript/mapbox-gl.js.map
+public/static/javascript/mapbox-gl.js:
+	curl -L https://api.tiles.mapbox.com/mapbox-gl-js/v$(MAPBOX_GL_JS_VERSION)/mapbox-gl.js > public/static/javascript/mapbox-gl.js
+public/static/javascript/mapbox-gl.js.map:
+	curl -L https://api.tiles.mapbox.com/mapbox-gl-js/v$(MAPBOX_GL_JS_VERSION)/mapbox-gl.js.map > public/static/javascript/mapbox-gl.js.map
 
-install-mapbox-gl-js-css: public/css/mapbox-gl.css
-public/css/mapbox-gl.css:
-	curl -L https://api.tiles.mapbox.com/mapbox-gl-js/v$(MAPBOX_GL_JS_VERSION)/mapbox-gl.css > public/css/mapbox-gl.css
+install-mapbox-gl-js-css: public/static/css/mapbox-gl.css
+public/static/css/mapbox-gl.css:
+	curl -L https://api.tiles.mapbox.com/mapbox-gl-js/v$(MAPBOX_GL_JS_VERSION)/mapbox-gl.css > public/static/css/mapbox-gl.css
 
 uninstall-mapbox-gl-js:
-	rm public/javascript/mapbox-gl.js
-	rm public/javascript/mapbox-gl.js.map
-	rm public/css/mapbox-gl.css
+	rm public/static/javascript/mapbox-gl.js
+	rm public/static/javascript/mapbox-gl.js.map
+	rm public/static/css/mapbox-gl.css
