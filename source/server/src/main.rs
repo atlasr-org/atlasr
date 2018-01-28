@@ -1,4 +1,5 @@
 extern crate hyper;
+extern crate mime;
 extern crate futures;
 extern crate regex;
 #[macro_use]
@@ -7,10 +8,21 @@ extern crate lazy_static;
 use futures::Future;
 use futures::sync::oneshot;
 
-use hyper::{Get, StatusCode};
+use hyper::{
+    Get,
+    StatusCode
+};
 use hyper::error::Error;
-use hyper::header::ContentLength;
-use hyper::server::{Http, Service, Request, Response};
+use hyper::header::{
+    ContentLength,
+    ContentType
+};
+use hyper::server::{
+    Http,
+    Service,
+    Request,
+    Response
+};
 
 use regex::Regex;
 
@@ -21,12 +33,31 @@ use std::thread;
 static NOT_FOUND: &[u8] = b"Not Found";
 static ROOT: &str = "../../public/";
 
+#[derive(Copy, Clone)]
 enum ResourceKind<'a> {
     Unknown(&'a str),
     Html(&'a str),
     Javascript(&'a str),
     Css(&'a str),
     Font(&'a str)
+}
+
+trait Path<'a> {
+    fn path(self) -> &'a str;
+}
+
+impl<'a> Path<'a> for ResourceKind<'a> {
+    fn path(self) -> &'a str {
+        match self {
+            ResourceKind::Unknown(path) |
+            ResourceKind::Html(path) |
+            ResourceKind::Javascript(path) |
+            ResourceKind::Css(path) |
+            ResourceKind::Font(path) => {
+                path
+            }
+        }
+    }
 }
 
 fn guess_resource_kind(path: &str) -> ResourceKind {
@@ -57,13 +88,21 @@ fn guess_resource_kind(path: &str) -> ResourceKind {
     }
 }
 
-fn serve_static_file(path: &str) -> Box<Future<Item = Response, Error = hyper::Error>> {
-    let pathname = path.to_string();
+fn serve_static_file<'a>(resource: ResourceKind<'a>) -> Box<Future<Item = Response, Error = hyper::Error>> {
+    let pathname     = resource.path().to_string();
+    let content_type = match resource {
+        ResourceKind::Unknown(_)    => ContentType::octet_stream(),
+        ResourceKind::Html(_)       => ContentType::html(),
+        ResourceKind::Javascript(_) => ContentType(mime::TEXT_JAVASCRIPT),
+        ResourceKind::Css(_)        => ContentType(mime::TEXT_CSS),
+        ResourceKind::Font(_)       => ContentType("application/font-woff".parse::<mime::Mime>().unwrap())
+    };
+
     let (tx, rx) = oneshot::channel();
 
     thread::spawn(
         move || {
-            let mut file = match File::open(pathname) {
+            let mut file = match File::open(format!("{}{}", ROOT, pathname)) {
                 Ok(f) => f,
 
                 Err(_) => {
@@ -82,10 +121,12 @@ fn serve_static_file(path: &str) -> Box<Future<Item = Response, Error = hyper::E
 
             match copy(&mut file, &mut buf) {
                 Ok(_) => {
+
                     tx
                         .send(
                             Response::new()
                                 .with_header(ContentLength(buf.len() as u64))
+                                .with_header(content_type)
                                 .with_body(buf)
                         )
                         .expect("Send error on successful file read");
@@ -118,15 +159,15 @@ impl Service for StaticResponses {
         match (request.method(), guess_resource_kind(request.path())) {
             (&Get, ResourceKind::Unknown("/")) |
             (&Get, ResourceKind::Html("/index.html")) => {
-                serve_static_file(&format!("{}static{}", ROOT, "/index.html"))
+                serve_static_file(ResourceKind::Html(&format!("static{}", "/index.html")))
             },
 
 
-            (&Get, ResourceKind::Html(path)) |
-            (&Get, ResourceKind::Javascript(path)) |
-            (&Get, ResourceKind::Css(path)) |
-            (&Get, ResourceKind::Font(path)) => {
-                serve_static_file(&format!("{}{}", ROOT, path))
+            (&Get, r @ ResourceKind::Html(_)) |
+            (&Get, r @ ResourceKind::Javascript(_)) |
+            (&Get, r @ ResourceKind::Css(_)) |
+            (&Get, r @ ResourceKind::Font(_)) => {
+                serve_static_file(r)
             }
 
             _ => {
