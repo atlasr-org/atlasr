@@ -1,13 +1,10 @@
 MAPBOX_GL_JS_VERSION=0.43.0
 
-install: install-server install-client install-mapbox-gl-js
-uninstall: uninstall-server uninstall-client uninstall-client-dependencies
+install: install-server install-client install-mapbox-gl-js install-api
+uninstall: uninstall-server uninstall-client uninstall-client-dependencies uninstall-api
 
 open: install
 	open http://127.0.0.1:8889
-
-server-run: install
-	cd source/server && cargo run
 
 clean: uninstall
 .PHONY: clean
@@ -21,6 +18,9 @@ install-server:
 
 uninstall-server:
 	rm -rf source/server/Cargo.lock source/server/target
+
+run-server: install
+	cd source/server && cargo run
 
 ###
 # Client
@@ -64,3 +64,23 @@ uninstall-mapbox-gl-js:
 	rm public/static/javascript/mapbox-gl.js
 	rm public/static/javascript/mapbox-gl.js.map
 	rm public/static/css/mapbox-gl.css
+
+###
+# API
+###
+
+install-api: install-api-graphhopper
+uninstall-api: uninstall-api-graphhopper
+
+###
+# API: GraphHopper
+###
+
+install-api-graphhopper:
+	git submodule update --init --all
+
+uninstall-api-graphhopper:
+	# noop
+
+run-api-graphhopper: install-api-graphhopper
+	source/api/graphhopper/graphhopper.sh web europe_switzerland.pbf
