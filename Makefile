@@ -77,7 +77,7 @@ uninstall-api: uninstall-api-graphhopper
 ###
 
 install-api-graphhopper:
-	git submodule update --init --all
+	git submodule update --init source/api/graphhopper
 
 uninstall-api-graphhopper:
 	# noop
