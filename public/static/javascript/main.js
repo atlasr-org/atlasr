@@ -40,5 +40,10 @@
                 );
             }
         );
+        atlasr.ports.mapboxgl_jump_to.subscribe(
+            (cameraOptions) => {
+                map.jumpTo(cameraOptions);
+            }
+        );
     }
 )();

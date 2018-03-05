@@ -1,11 +1,14 @@
 module Atlasr.Main exposing (..)
 
+import Atlasr.Geocode as Geocode
 import Atlasr.Map as Map
 import Atlasr.MapboxGL.Options as MapOptions
+import Atlasr.Position exposing (LongitudeLatitude)
 import Html exposing (..)
 import Html.Attributes exposing (..)
 import Html.Attributes.Aria exposing (..)
 import Html.Events exposing (..)
+import Http
 
 
 main =
@@ -18,20 +21,25 @@ main =
 
 
 type alias Model =
-    { search : String
+    { positionName : String
+    , positionGeocode : LongitudeLatitude
     }
 
 
 init : ( Model, Cmd Msg )
 init =
-    ( Model "", Map.create "map" MapOptions.default )
+    ( { positionName = ""
+      , positionGeocode = ( 0.0, 0.0 )
+      }
+    , Map.create "map" MapOptions.default
+    )
 
 
 view : Model -> Html Msg
 view model =
     let
         expandedNav =
-            if String.isEmpty model.search then
+            if String.isEmpty model.positionName then
                 "false"
             else
                 "true"
@@ -39,10 +47,10 @@ view model =
         main_ []
             [ nav
                 [ ariaExpanded expandedNav ]
-                [ Html.form [ role "search" ]
+                [ Html.form [ role "search", onSubmit Search ]
                     [ input
                         [ type_ "search"
-                        , onInput Search
+                        , onInput NewPositionName
                         , ariaLabel "Browse the world"
                         , ariaRequired True
                         , placeholder "Browse the world"
@@ -57,14 +65,33 @@ view model =
 
 
 type Msg
-    = Search String
+    = NewPositionName String
+    | NewPositionGeocode (Result Http.Error Geocode.LongitudeLatitude)
+    | Search
 
 
 update : Msg -> Model -> ( Model, Cmd Msg )
 update msg model =
     case msg of
-        Search newSearch ->
-            ( { model | search = newSearch }, Cmd.none )
+        NewPositionName positionName ->
+            ( { model | positionName = positionName }, Cmd.none )
+
+        NewPositionGeocode (Ok geocode) ->
+            let
+                positionGeocode =
+                    ( Result.withDefault 0.0 (String.toFloat geocode.longitude)
+                    , Result.withDefault 0.0 (String.toFloat geocode.latitude)
+                    )
+            in
+                ( { model | positionGeocode = positionGeocode }
+                , Map.jumpTo positionGeocode
+                )
+
+        NewPositionGeocode (Err _) ->
+            Debug.crash "nooooo"
+
+        Search ->
+            ( model, Geocode.toGeocode NewPositionGeocode model.positionName )
 
 
 subscriptions : Model -> Sub Msg

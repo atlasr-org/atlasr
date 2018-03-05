@@ -36,3 +36,7 @@ default =
     , trackResize = True
     , renderWorldCopies = True
     }
+
+
+type alias Camera =
+    { center : LongitudeLatitude }

@@ -1,0 +1,4 @@
+[submodule "source/api/graphhopper"]
+	path = source/api/graphhopper
+	url = https://github.com/atlasr-org/graphhopper
+	branch = master
