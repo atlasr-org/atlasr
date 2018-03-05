@@ -40,9 +40,9 @@
                 );
             }
         );
-        atlasr.ports.mapboxgl_jump_to.subscribe(
+        atlasr.ports.mapboxgl_fly_to.subscribe(
             (cameraOptions) => {
-                map.jumpTo(cameraOptions);
+                map.flyTo(cameraOptions);
             }
         );
     }
