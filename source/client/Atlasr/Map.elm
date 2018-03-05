@@ -10,6 +10,6 @@ create id options =
     mapboxgl_create_map ( id, options )
 
 
-jumpTo : LongitudeLatitude -> Cmd msg
-jumpTo longitudeLatitude =
-    mapboxgl_jump_to { center = longitudeLatitude }
+flyTo : LongitudeLatitude -> Cmd msg
+flyTo longitudeLatitude =
+    mapboxgl_fly_to { center = longitudeLatitude }

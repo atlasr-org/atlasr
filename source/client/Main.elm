@@ -84,7 +84,7 @@ update msg model =
                     )
             in
                 ( { model | positionGeocode = positionGeocode }
-                , Map.jumpTo positionGeocode
+                , Map.flyTo positionGeocode
                 )
 
         NewPositionGeocode (Err _) ->
