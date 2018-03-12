@@ -13,3 +13,8 @@ create id options =
 flyTo : LongitudeLatitude -> Cmd msg
 flyTo longitudeLatitude =
     mapboxgl_fly_to { center = longitudeLatitude }
+
+
+addMarker : LongitudeLatitude -> Cmd msg
+addMarker longitudeLatitude =
+    mapboxgl_add_marker longitudeLatitude

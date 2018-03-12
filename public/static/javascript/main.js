@@ -45,5 +45,21 @@
                 map.flyTo(cameraOptions);
             }
         );
+        atlasr.ports.mapboxgl_add_marker.subscribe(
+            new function() {
+                let marker = null;
+
+                return ([longitude, latitude]) => {
+                    if (marker instanceof mapboxgl.Marker) {
+                        marker.remove();
+                    }
+
+                    marker =
+                        new mapboxgl.Marker()
+                            .setLngLat([longitude, latitude])
+                            .addTo(map);
+                }
+            }
+        );
     }
 )();

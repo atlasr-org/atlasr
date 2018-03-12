@@ -84,7 +84,7 @@ update msg model =
                     )
             in
                 ( { model | positionGeocode = positionGeocode }
-                , Map.flyTo positionGeocode
+                , Cmd.batch [ Map.flyTo positionGeocode, Map.addMarker positionGeocode ]
                 )
 
         NewPositionGeocode (Err _) ->
