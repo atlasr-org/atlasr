@@ -1,4 +1,4 @@
-mapbox_gl_js_version = "0.43.0"
+mapbox_gl_js_version = "0.44.1"
 
 # Open Atlasr in your favorite browser.
 open: install
