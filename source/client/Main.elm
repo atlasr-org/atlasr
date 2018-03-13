@@ -36,14 +36,15 @@ init =
 view : Model -> Html Msg
 view model =
     let
-        ( positionName, _ ) =
-            Array.get 0 model.positions |> Maybe.withDefault Position.defaultNamedPosition
+        hasAtLeastOnePositionName =
+            Array.toList model.positions
+                |> List.any (\( positionName, _ ) -> not (String.isEmpty positionName))
 
         expandedNav =
-            if String.isEmpty positionName then
-                "false"
-            else
+            if hasAtLeastOnePositionName then
                 "true"
+            else
+                "false"
     in
         main_ []
             [ nav
