@@ -1,6 +1,6 @@
 module Atlasr.Map exposing (..)
 
-import Atlasr.Position exposing (LongitudeLatitude)
+import Atlasr.Position exposing (Position)
 import Atlasr.MapboxGL.Options as Options
 import Atlasr.MapboxGL.Ports exposing (..)
 
@@ -10,11 +10,11 @@ create id options =
     mapboxgl_create_map ( id, options )
 
 
-flyTo : LongitudeLatitude -> Cmd msg
-flyTo longitudeLatitude =
-    mapboxgl_fly_to { center = longitudeLatitude }
+flyTo : Position -> Cmd msg
+flyTo position =
+    mapboxgl_fly_to { center = position }
 
 
-addMarker : LongitudeLatitude -> Cmd msg
-addMarker longitudeLatitude =
-    mapboxgl_add_marker longitudeLatitude
+addMarker : Position -> Cmd msg
+addMarker position =
+    mapboxgl_add_marker position

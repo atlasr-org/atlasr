@@ -1,15 +1,42 @@
 module Atlasr.Position exposing (..)
 
 
-type alias LongitudeLatitude =
-    ( Float, Float )
+type alias Longitude =
+    Float
 
 
-extractLongitude : LongitudeLatitude -> Float
+type alias Latitude =
+    Float
+
+
+type alias Position =
+    ( Longitude, Latitude )
+
+
+defaultPosition : Position
+defaultPosition =
+    ( 0.0, 0.0 )
+
+
+extractLongitude : Position -> Float
 extractLongitude ( longitude, _ ) =
     longitude
 
 
-extractLatitude : LongitudeLatitude -> Float
+extractLatitude : Position -> Float
 extractLatitude ( _, latitude ) =
     latitude
+
+
+type alias NamedPosition =
+    ( String, Position )
+
+
+defaultName : String
+defaultName =
+    ""
+
+
+defaultNamedPosition : NamedPosition
+defaultNamedPosition =
+    ( "", defaultPosition )

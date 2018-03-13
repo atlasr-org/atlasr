@@ -1,11 +1,11 @@
 module Atlasr.MapboxGL.Options exposing (..)
 
-import Atlasr.Position exposing (LongitudeLatitude)
+import Atlasr.Position exposing (Position)
 
 
 type alias Map =
     { style : String
-    , center : LongitudeLatitude
+    , center : Position
     , zoom : Int
     , hash : Bool
     , pitchWithRotate : Bool
@@ -39,4 +39,4 @@ default =
 
 
 type alias Camera =
-    { center : LongitudeLatitude }
+    { center : Position }

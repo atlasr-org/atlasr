@@ -3,12 +3,14 @@ module Atlasr.Main exposing (..)
 import Atlasr.Geocode as Geocode
 import Atlasr.Map as Map
 import Atlasr.MapboxGL.Options as MapOptions
-import Atlasr.Position exposing (LongitudeLatitude)
+import Atlasr.Position exposing (Position, NamedPosition)
+import Atlasr.Position as Position
 import Html exposing (..)
 import Html.Attributes exposing (..)
 import Html.Attributes.Aria exposing (..)
 import Html.Events exposing (..)
 import Http
+import Array exposing (Array)
 
 
 main =
@@ -21,16 +23,12 @@ main =
 
 
 type alias Model =
-    { positionName : String
-    , positionGeocode : LongitudeLatitude
-    }
+    { positions : Array NamedPosition }
 
 
 init : ( Model, Cmd Msg )
 init =
-    ( { positionName = ""
-      , positionGeocode = ( 0.0, 0.0 )
-      }
+    ( { positions = Array.repeat 2 Position.defaultNamedPosition }
     , Map.create "map" MapOptions.default
     )
 
@@ -38,8 +36,11 @@ init =
 view : Model -> Html Msg
 view model =
     let
+        ( positionName, _ ) =
+            Array.get 0 model.positions |> Maybe.withDefault Position.defaultNamedPosition
+
         expandedNav =
-            if String.isEmpty model.positionName then
+            if String.isEmpty positionName then
                 "false"
             else
                 "true"
@@ -47,10 +48,10 @@ view model =
         main_ []
             [ nav
                 [ ariaExpanded expandedNav ]
-                [ Html.form [ role "search", onSubmit Search ]
+                [ Html.form [ role "search", onSubmit (Search 0) ]
                     [ input
                         [ type_ "search"
-                        , onInput NewPositionName
+                        , onInput (NewPositionName 0)
                         , ariaLabel "Browse the world"
                         , ariaRequired True
                         , placeholder "Browse the world"
@@ -65,33 +66,52 @@ view model =
 
 
 type Msg
-    = NewPositionName String
-    | NewPositionGeocode (Result Http.Error Geocode.LongitudeLatitude)
-    | Search
+    = NewPositionName Int String
+    | NewPositionGeocode Int (Result Http.Error Geocode.LongitudeLatitude)
+    | Search Int
 
 
 update : Msg -> Model -> ( Model, Cmd Msg )
 update msg model =
     case msg of
-        NewPositionName positionName ->
-            ( { model | positionName = positionName }, Cmd.none )
-
-        NewPositionGeocode (Ok geocode) ->
+        NewPositionName index positionName ->
             let
-                positionGeocode =
-                    ( Result.withDefault 0.0 (String.toFloat geocode.longitude)
-                    , Result.withDefault 0.0 (String.toFloat geocode.latitude)
-                    )
+                positions =
+                    Array.set index ( positionName, Position.defaultPosition ) model.positions
             in
-                ( { model | positionGeocode = positionGeocode }
-                , Cmd.batch [ Map.flyTo positionGeocode, Map.addMarker positionGeocode ]
+                ( { model | positions = positions }, Cmd.none )
+
+        NewPositionGeocode index (Ok geocode) ->
+            let
+                positionName =
+                    Array.get index model.positions
+                        |> Maybe.map (\( positionName, _ ) -> positionName)
+                        |> Maybe.withDefault Position.defaultName
+
+                ( defaultLongitude, defaultLatitude ) =
+                    Position.defaultPosition
+
+                position =
+                    ( String.toFloat geocode.longitude |> Result.withDefault defaultLongitude
+                    , String.toFloat geocode.latitude |> Result.withDefault defaultLatitude
+                    )
+
+                positions =
+                    Array.set index ( positionName, position ) model.positions
+            in
+                ( { model | positions = positions }
+                , Cmd.batch [ Map.flyTo position, Map.addMarker position ]
                 )
 
-        NewPositionGeocode (Err _) ->
+        NewPositionGeocode _ (Err _) ->
             Debug.crash "nooooo"
 
-        Search ->
-            ( model, Geocode.toGeocode NewPositionGeocode model.positionName )
+        Search index ->
+            ( model
+            , Array.get index model.positions
+                |> Maybe.map (\( positionName, _ ) -> Geocode.toGeocode (NewPositionGeocode index) positionName)
+                |> Maybe.withDefault Cmd.none
+            )
 
 
 subscriptions : Model -> Sub Msg
