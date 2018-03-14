@@ -39,4 +39,4 @@ defaultName =
 
 defaultNamedPosition : NamedPosition
 defaultNamedPosition =
-    ( "", defaultPosition )
+    ( defaultName, defaultPosition )
