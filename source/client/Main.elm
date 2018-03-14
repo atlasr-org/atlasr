@@ -49,7 +49,7 @@ view model =
         main_ []
             [ nav
                 [ ariaExpanded expandedNav ]
-                [ Html.form [ role "search", onSubmit (Search 0) ]
+                [ Html.form [ role "search", onSubmit Search ]
                     [ input
                         [ type_ "search"
                         , onInput (NewPositionName 0)
@@ -69,7 +69,7 @@ view model =
 type Msg
     = NewPositionName Int String
     | NewPositionGeocode Int (Result Http.Error Geocode.LongitudeLatitude)
-    | Search Int
+    | Search
 
 
 update : Msg -> Model -> ( Model, Cmd Msg )
@@ -107,12 +107,28 @@ update msg model =
         NewPositionGeocode _ (Err _) ->
             Debug.crash "nooooo"
 
-        Search index ->
-            ( model
-            , Array.get index model.positions
-                |> Maybe.map (\( positionName, _ ) -> Geocode.toGeocode (NewPositionGeocode index) positionName)
-                |> Maybe.withDefault Cmd.none
-            )
+        Search ->
+            let
+                positionsToGeocode =
+                    Array.toIndexedList model.positions
+                        |> List.filterMap
+                            (\( index, ( positionName, position ) ) ->
+                                let
+                                    ( defaultName, defaultPosition ) =
+                                        Position.defaultNamedPosition
+                                in
+                                    if positionName /= defaultName && position == defaultPosition then
+                                        Just ( index, positionName )
+                                    else
+                                        Nothing
+                            )
+            in
+                ( model
+                , List.map
+                    (\( index, positionName ) -> Geocode.toGeocode (NewPositionGeocode index) positionName)
+                    positionsToGeocode
+                    |> Cmd.batch
+                )
 
 
 subscriptions : Model -> Sub Msg
