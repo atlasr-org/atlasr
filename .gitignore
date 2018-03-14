@@ -1,7 +1,8 @@
-/elm-stuff
 /public/static/css/mapbox-gl.*
 /public/static/index.html
 /public/static/javascript/*.elm.js
 /public/static/javascript/mapbox-gl.*
+/source/client/elm-stuff
+/source/client/tests/elm-stuff
 /source/server/Cargo.lock
 /source/server/target

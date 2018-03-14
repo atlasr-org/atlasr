@@ -10,6 +10,8 @@ type alias LongitudeLatitude =
     }
 
 
+{-| Geocode a position name (using an HTTP service).
+-}
 toGeocode : (Result Http.Error LongitudeLatitude -> msg) -> String -> Cmd msg
 toGeocode outputType positionName =
     let
@@ -22,6 +24,8 @@ toGeocode outputType positionName =
         Http.send outputType request
 
 
+{-| Decoder for the geocode payload from the HTTP service.
+-}
 decodeGeocode : Json.Decode.Decoder LongitudeLatitude
 decodeGeocode =
     Json.Decode.at [ "0" ]

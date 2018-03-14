@@ -7,12 +7,19 @@ open: install
 # Install Atlasr!
 install: install-server install-api install-client
 
+# Test Atlasr.
+test: test-server test-client
+
 # Uninstall Atlasr.
 uninstall: uninstall-server uninstall-api uninstall-client
 
 # Install the HTTP server.
 install-server:
 	cd source/server && cargo build --release
+
+# Test the HTTP server.
+test-server:
+	cd source/server && cargo test
 
 # Uninstall the HTTP server.
 uninstall-server:
@@ -43,6 +50,9 @@ run-api-graphhopper map_file='europe_switzerland': install-api-graphhopper
 # Install client.
 install-client: install-client-index install-client-application install-client-dependencies
 
+# Test client.
+test-client: test-client-application
+
 # Uninstall client.
 uninstall-client: uninstall-client-index uninstall-client-application
 
@@ -57,7 +67,11 @@ uninstall-client-index:
 
 # Compile the Elm application to JS.
 install-client-application:
-	elm-make source/client/Main.elm --output public/static/javascript/application.elm.js
+	cd source/client && elm-make src/Main.elm --output ../../public/static/javascript/application.elm.js
+
+# Test the Elm application.
+test-client-application:
+	cd source/client && elm-test --watch tests/unit/
 
 # Remove the Elm build artifact.
 uninstall-client-application:
