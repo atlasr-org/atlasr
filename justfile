@@ -26,7 +26,7 @@ uninstall-server:
 	rm -rf source/server/Cargo.lock source/server/target
 
 # Run the HTTP server (will not exit).
-run-server: install
+run-server:
 	cd source/server && cargo run
 
 # Install all the APIs.
@@ -71,7 +71,7 @@ install-client-application:
 
 # Test the Elm application.
 test-client-application:
-	cd source/client && elm-test --watch tests/unit/
+	cd source/client && elm-test tests/unit/
 
 # Remove the Elm build artifact.
 uninstall-client-application:
