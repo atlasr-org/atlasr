@@ -11,3 +11,9 @@ port mapboxgl_fly_to : Options.Camera -> Cmd msg
 
 
 port mapboxgl_add_marker : ( Longitude, Latitude ) -> Cmd msg
+
+
+port mapboxgl_remove_markers : () -> Cmd msg
+
+
+port mapboxgl_connect_markers : () -> Cmd msg

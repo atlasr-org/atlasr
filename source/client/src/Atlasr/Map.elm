@@ -24,3 +24,15 @@ flyTo position =
 addMarker : Position -> Cmd msg
 addMarker position =
     mapboxgl_add_marker position
+
+
+{-| Remove all markers.
+-}
+removeMarkers : Cmd msg
+removeMarkers =
+    mapboxgl_remove_markers ()
+
+
+connectMarkers : Cmd msg
+connectMarkers =
+    mapboxgl_connect_markers ()

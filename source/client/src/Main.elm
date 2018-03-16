@@ -40,6 +40,11 @@ view model =
             Array.toList model.positions
                 |> List.any (\( positionName, _ ) -> not (String.isEmpty positionName))
 
+        firstPositionIsUnknown =
+            Array.get 0 model.positions
+                |> Maybe.map (\( _, position ) -> position == Position.defaultPosition)
+                |> Maybe.withDefault False
+
         expandedNav =
             if hasAtLeastOnePositionName then
                 "true"
@@ -51,7 +56,7 @@ view model =
                 [ ariaExpanded expandedNav ]
                 [ Html.form [ role "search", onSubmit Search ]
                     [ input
-                        [ type_ "search"
+                        [ type_ "text"
                         , onInput (NewPositionName 0)
                         , ariaLabel "Browse the world"
                         , ariaRequired True
@@ -61,6 +66,26 @@ view model =
                                 |> Maybe.map (\( positionName, _ ) -> positionName)
                                 |> Maybe.withDefault Position.defaultName
                             )
+                        ]
+                        []
+                    , input
+                        [ type_ "text"
+                        , onInput (NewPositionName 1)
+                        , ariaLabel "Search for a direction"
+                        , ariaRequired False
+                        , ariaHidden firstPositionIsUnknown
+                        , disabled firstPositionIsUnknown
+                        , placeholder "Search for a direction"
+                        , value
+                            (Array.get 1 model.positions
+                                |> Maybe.map (\( positionName, _ ) -> positionName)
+                                |> Maybe.withDefault Position.defaultName
+                            )
+                        ]
+                        []
+                    , input
+                        [ type_ "submit"
+                        , value "Search"
                         ]
                         []
                     ]
@@ -73,8 +98,14 @@ view model =
 
 type Msg
     = NewPositionName Int String
+    | GeoencodePositionName Int String
     | NewPositionGeocode Int (Result Http.Error Geocode.LongitudeLatitude)
     | Search
+    | AddMarker Position
+    | RemoveMarkers
+    | ConnectMarkers
+    | FlyTo Position
+    | Chain (List Msg)
 
 
 update : Msg -> Model -> ( Model, Cmd Msg )
@@ -86,6 +117,9 @@ update msg model =
                     Array.set index ( positionName, Position.defaultPosition ) model.positions
             in
                 ( { model | positions = positions }, Cmd.none )
+
+        GeoencodePositionName index positionName ->
+            ( model, Geocode.toGeocode (NewPositionGeocode index) positionName )
 
         NewPositionGeocode index (Ok geocode) ->
             let
@@ -103,9 +137,9 @@ update msg model =
                 positions =
                     Array.set index ( positionName, position ) model.positions
             in
-                ( { model | positions = positions }
-                , Cmd.batch [ Map.flyTo position, Map.addMarker position ]
-                )
+                update
+                    (Chain [ FlyTo position, AddMarker position ])
+                    { model | positions = positions }
 
         NewPositionGeocode _ (Err _) ->
             Debug.crash "nooooo"
@@ -126,12 +160,39 @@ update msg model =
                                         Nothing
                             )
             in
-                ( model
-                , List.map
-                    (\( index, positionName ) -> Geocode.toGeocode (NewPositionGeocode index) positionName)
-                    positionsToGeocode
-                    |> Cmd.batch
-                )
+                update
+                    (Chain
+                        ([ RemoveMarkers ]
+                            ++ List.map
+                                (\( index, positionName ) -> GeoencodePositionName index positionName)
+                                positionsToGeocode
+                            ++ [ ConnectMarkers ]
+                        )
+                    )
+                    model
+
+        AddMarker position ->
+            ( model, Map.addMarker position )
+
+        RemoveMarkers ->
+            ( model, Map.removeMarkers )
+
+        ConnectMarkers ->
+            ( model, Map.connectMarkers )
+
+        FlyTo position ->
+            ( model, Map.flyTo position )
+
+        Chain messages ->
+            let
+                chain message ( model1, commands ) =
+                    let
+                        ( nextModel, nextCommands ) =
+                            update message model
+                    in
+                        nextModel ! [ commands, nextCommands ]
+            in
+                List.foldl chain (model ! []) messages
 
 
 subscriptions : Model -> Sub Msg
