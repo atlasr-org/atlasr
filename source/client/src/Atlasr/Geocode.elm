@@ -5,7 +5,8 @@ import Json.Decode
 
 
 type alias LongitudeLatitude =
-    { longitude : String
+    { label : String
+    , longitude : String
     , latitude : String
     }
 
@@ -29,8 +30,9 @@ toGeocode outputType positionName =
 decodeGeocode : Json.Decode.Decoder LongitudeLatitude
 decodeGeocode =
     Json.Decode.at [ "0" ]
-        (Json.Decode.map2
+        (Json.Decode.map3
             LongitudeLatitude
+            (Json.Decode.field "display_name" Json.Decode.string)
             (Json.Decode.field "lon" Json.Decode.string)
             (Json.Decode.field "lat" Json.Decode.string)
         )

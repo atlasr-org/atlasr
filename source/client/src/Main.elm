@@ -56,6 +56,11 @@ view model =
                         , ariaLabel "Browse the world"
                         , ariaRequired True
                         , placeholder "Browse the world"
+                        , value
+                            (Array.get 0 model.positions
+                                |> Maybe.map (\( positionName, _ ) -> positionName)
+                                |> Maybe.withDefault Position.defaultName
+                            )
                         ]
                         []
                     ]
@@ -84,13 +89,11 @@ update msg model =
 
         NewPositionGeocode index (Ok geocode) ->
             let
-                positionName =
-                    Array.get index model.positions
-                        |> Maybe.map (\( positionName, _ ) -> positionName)
-                        |> Maybe.withDefault Position.defaultName
-
                 ( defaultLongitude, defaultLatitude ) =
                     Position.defaultPosition
+
+                positionName =
+                    geocode.label
 
                 position =
                     ( String.toFloat geocode.longitude |> Result.withDefault defaultLongitude
