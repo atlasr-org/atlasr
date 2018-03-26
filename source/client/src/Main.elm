@@ -3,14 +3,16 @@ module Atlasr.Main exposing (..)
 import Atlasr.Geocode as Geocode
 import Atlasr.Map as Map
 import Atlasr.MapboxGL.Options as MapOptions
-import Atlasr.Position exposing (Position, NamedPosition)
 import Atlasr.Position as Position
+import Atlasr.Position exposing (Position, NamedPosition)
+import Array exposing (Array)
 import Html exposing (..)
 import Html.Attributes exposing (..)
 import Html.Attributes.Aria exposing (..)
 import Html.Events exposing (..)
 import Http
-import Array exposing (Array)
+import Process
+import Task as CoreTask
 
 
 main =
@@ -40,11 +42,6 @@ view model =
             Array.toList model.positions
                 |> List.any (\( positionName, _ ) -> not (String.isEmpty positionName))
 
-        firstPositionIsUnknown =
-            Array.get 0 model.positions
-                |> Maybe.map (\( _, position ) -> position == Position.defaultPosition)
-                |> Maybe.withDefault False
-
         expandedNav =
             if hasAtLeastOnePositionName then
                 "true"
@@ -73,8 +70,6 @@ view model =
                         , onInput (NewPositionName 1)
                         , ariaLabel "Search for a direction"
                         , ariaRequired False
-                        , ariaHidden firstPositionIsUnknown
-                        , disabled firstPositionIsUnknown
                         , placeholder "Search for a direction"
                         , value
                             (Array.get 1 model.positions
@@ -98,12 +93,11 @@ view model =
 
 type Msg
     = NewPositionName Int String
-    | GeoencodePositionName Int String
-    | NewPositionGeocode Int (Result Http.Error Geocode.LongitudeLatitude)
+    | GeoencodePositionNames (List ( Int, String ))
+    | NewPositionGeocodes (Result Http.Error (List ( Int, Geocode.LongitudeLatitude )))
     | Search
-    | AddMarker Position
+    | AddAndConnectMarkers (List Position)
     | RemoveMarkers
-    | ConnectMarkers
     | FlyTo Position
     | Chain (List Msg)
 
@@ -118,67 +112,55 @@ update msg model =
             in
                 ( { model | positions = positions }, Cmd.none )
 
-        GeoencodePositionName index positionName ->
-            ( model, Geocode.toGeocode (NewPositionGeocode index) positionName )
+        GeoencodePositionNames positionsToGeocode ->
+            ( model, Geocode.toGeocodes NewPositionGeocodes positionsToGeocode )
 
-        NewPositionGeocode index (Ok geocode) ->
+        NewPositionGeocodes (Ok geocodes) ->
             let
                 ( defaultLongitude, defaultLatitude ) =
                     Position.defaultPosition
 
-                positionName =
-                    geocode.label
+                namedPositions =
+                    List.map
+                        (\( index, geocode ) ->
+                            let
+                                positionName =
+                                    geocode.label
 
-                position =
-                    ( String.toFloat geocode.longitude |> Result.withDefault defaultLongitude
-                    , String.toFloat geocode.latitude |> Result.withDefault defaultLatitude
-                    )
+                                position =
+                                    ( String.toFloat geocode.longitude |> Result.withDefault defaultLongitude
+                                    , String.toFloat geocode.latitude |> Result.withDefault defaultLatitude
+                                    )
+                            in
+                                ( positionName, position )
+                        )
+                        geocodes
 
                 positions =
-                    Array.set index ( positionName, position ) model.positions
+                    List.map (\( _, position ) -> position) namedPositions
             in
                 update
-                    (Chain [ FlyTo position, AddMarker position ])
-                    { model | positions = positions }
+                    (AddAndConnectMarkers positions)
+                    { model | positions = namedPositions |> Array.fromList }
 
-        NewPositionGeocode _ (Err _) ->
-            Debug.crash "nooooo"
+        NewPositionGeocodes (Err _) ->
+            Debug.crash "hooo"
 
         Search ->
             let
                 positionsToGeocode =
                     Array.toIndexedList model.positions
-                        |> List.filterMap
-                            (\( index, ( positionName, position ) ) ->
-                                let
-                                    ( defaultName, defaultPosition ) =
-                                        Position.defaultNamedPosition
-                                in
-                                    if positionName /= defaultName && position == defaultPosition then
-                                        Just ( index, positionName )
-                                    else
-                                        Nothing
-                            )
+                        |> List.filterMap (\( index, ( positionName, position ) ) -> Just ( index, positionName ))
             in
                 update
-                    (Chain
-                        ([ RemoveMarkers ]
-                            ++ List.map
-                                (\( index, positionName ) -> GeoencodePositionName index positionName)
-                                positionsToGeocode
-                            ++ [ ConnectMarkers ]
-                        )
-                    )
+                    (Chain [ RemoveMarkers, GeoencodePositionNames positionsToGeocode ])
                     model
 
-        AddMarker position ->
-            ( model, Map.addMarker position )
+        AddAndConnectMarkers positions ->
+            ( model, Map.addAndConnectMarkers positions )
 
         RemoveMarkers ->
             ( model, Map.removeMarkers )
-
-        ConnectMarkers ->
-            ( model, Map.connectMarkers )
 
         FlyTo position ->
             ( model, Map.flyTo position )

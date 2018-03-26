@@ -1,8 +1,10 @@
 (
     () => {
-        const atlasr  = Elm.Atlasr.Main.fullscreen();
-        let   map     = null;
-        let   markers = [];
+        const atlasr                     = Elm.Atlasr.Main.fullscreen();
+        const LAYER_ROUTE_MARKERS_PREFIX = 'markers-';
+        let   map                        = null;
+        let   layer_route_markers        = '';
+        let   markers                    = [];
 
         atlasr.ports.mapboxgl_create_map.subscribe(
             ([id, options]) => {
@@ -46,14 +48,41 @@
                 map.flyTo(cameraOptions);
             }
         );
-        atlasr.ports.mapboxgl_add_marker.subscribe(
-            ([longitude, latitude]) => {
-                const marker =
-                    new mapboxgl.Marker()
-                        .setLngLat([longitude, latitude])
-                        .addTo(map);
+        atlasr.ports.mapboxgl_add_and_connect_markers.subscribe(
+            (positions) => {
+                for (let [longitude, latitude] of positions) {
+                    markers.push(
+                        new mapboxgl.Marker()
+                            .setLngLat([longitude, latitude])
+                            .addTo(map)
+                    );
+                }
 
-                markers.push(marker);
+                layer_route_markers = LAYER_ROUTE_MARKERS_PREFIX + guid();
+
+                map.addLayer({
+                    'id': layer_route_markers,
+                    'type': 'line',
+                    'source': {
+                        'type': 'geojson',
+                        'data': {
+                            'type': 'Feature',
+                            'properties': {},
+                            'geometry': {
+                                'type': 'LineString',
+                                'coordinates': positions
+                            }
+                        }
+                    },
+                    'layout': {
+                        'line-join': 'round',
+                        'line-cap': 'round'
+                    },
+                    'paint': {
+                        'line-color': '#00b3fd',
+                        'line-width': 8
+                    }
+                });
             }
         );
         atlasr.ports.mapboxgl_remove_markers.subscribe(
@@ -63,47 +92,21 @@
                 }
 
                 markers = [];
+
+                if (undefined !== map.getLayer(layer_route_markers)) {
+                    map.removeLayer(layer_route_markers);
+                }
             }
         );
-        atlasr.ports.mapboxgl_connect_markers.subscribe(
-            () => {
-                setTimeout(
-                    () => {
-                        let coordinates = [];
 
-                        for (let marker of markers) {
-                            coordinates.push(marker.getLngLat().toArray());
-                        }
+        function guid() {
+            const s4 = () => {
+                return Math.floor((1 + Math.random()) * 0x10000)
+                    .toString(16)
+                    .substring(1);
+            };
 
-                        console.log(coordinates);
-
-                        map.addLayer({
-                            'id': 'route',
-                            'type': 'line',
-                            'source': {
-                                'type': 'geojson',
-                                'data': {
-                                    'type': 'Feature',
-                                    'properties': {},
-                                    'geometry': {
-                                        'type': 'LineString',
-                                        'coordinates': coordinates
-                                    }
-                                }
-                            },
-                            'layout': {
-                                'line-join': 'round',
-                                'line-cap': 'round'
-                            },
-                            'paint': {
-                                'line-color': '#00b3fd',
-                                'line-width': 8
-                            }
-                        });
-                    },
-                    2000
-                );
-            }
-        );
+            return s4() + s4() + '-' + s4() + '-' + s4() + '-' + s4() + '-' + s4() + s4() + s4();
+        }
     }
 )();

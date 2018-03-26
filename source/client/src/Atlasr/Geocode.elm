@@ -1,7 +1,8 @@
-module Atlasr.Geocode exposing (LongitudeLatitude, toGeocode)
+module Atlasr.Geocode exposing (LongitudeLatitude, toGeocodes)
 
 import Http
 import Json.Decode
+import Task
 
 
 type alias LongitudeLatitude =
@@ -11,18 +12,32 @@ type alias LongitudeLatitude =
     }
 
 
-{-| Geocode a position name (using an HTTP service).
+{-| Geocode a list of position names.
 -}
-toGeocode : (Result Http.Error LongitudeLatitude -> msg) -> String -> Cmd msg
-toGeocode outputType positionName =
+toGeocodes : (Result Http.Error (List ( Int, LongitudeLatitude )) -> msg) -> List ( Int, String ) -> Cmd msg
+toGeocodes outputType positionsToGeocode =
+    let
+        tasks =
+            List.map
+                (\( index, positionName ) ->
+                    positionToGeocodeRequest positionName
+                        |> Http.toTask
+                        |> Task.map (\longitudeLatitude -> ( index, longitudeLatitude ))
+                )
+                positionsToGeocode
+    in
+        Task.attempt outputType <| Task.sequence tasks
+
+
+{-| Create an HTTP request to geocode a position.
+-}
+positionToGeocodeRequest : String -> Http.Request LongitudeLatitude
+positionToGeocodeRequest positionName =
     let
         url =
             "https://nominatim.openstreetmap.org/search?format=json&limit=1&q=" ++ positionName
-
-        request =
-            Http.get url decodeGeocode
     in
-        Http.send outputType request
+        Http.get url decodeGeocode
 
 
 {-| Decoder for the geocode payload from the HTTP service.
