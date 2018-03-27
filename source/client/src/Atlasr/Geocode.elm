@@ -13,20 +13,6 @@ type alias LongitudeLatitude =
     }
 
 
-{-| Allocate a default longitude-latitude.
--}
-defaultLongitudeLatitude : LongitudeLatitude
-defaultLongitudeLatitude =
-    let
-        ( defaultName, ( defaultLongitude, defaultLatitude ) ) =
-            defaultNamedPosition
-    in
-        { label = defaultName
-        , longitude = toString defaultLongitude
-        , latitude = toString defaultLatitude
-        }
-
-
 {-| Geocode a list of position names.
 -}
 toGeocodes : (Result Http.Error (List (Maybe LongitudeLatitude)) -> msg) -> List NamedPosition -> Cmd msg
