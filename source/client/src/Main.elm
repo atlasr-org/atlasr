@@ -93,8 +93,8 @@ view model =
 
 type Msg
     = NewPositionName Int String
-    | GeoencodePositionNames (List ( Int, String ))
-    | NewPositionGeocodes (Result Http.Error (List ( Int, Geocode.LongitudeLatitude )))
+    | GeoencodePositionNames (List NamedPosition)
+    | NewPositionGeocodes (Result Http.Error (List (Maybe Geocode.LongitudeLatitude)))
     | Search
     | AddAndConnectMarkers (List Position)
     | RemoveMarkers
@@ -122,39 +122,53 @@ update msg model =
 
                 namedPositions =
                     List.map
-                        (\( index, geocode ) ->
-                            let
-                                positionName =
-                                    geocode.label
+                        (\geocode ->
+                            Maybe.map
+                                (\geocode ->
+                                    let
+                                        positionName =
+                                            geocode.label
 
-                                position =
-                                    ( String.toFloat geocode.longitude |> Result.withDefault defaultLongitude
-                                    , String.toFloat geocode.latitude |> Result.withDefault defaultLatitude
-                                    )
-                            in
-                                ( positionName, position )
+                                        position =
+                                            ( String.toFloat geocode.longitude |> Result.withDefault defaultLongitude
+                                            , String.toFloat geocode.latitude |> Result.withDefault defaultLatitude
+                                            )
+                                    in
+                                        ( positionName, position )
+                                )
+                                geocode
                         )
                         geocodes
 
                 positions =
-                    List.map (\( _, position ) -> position) namedPositions
+                    List.filterMap
+                        (\namedPosition ->
+                            Maybe.map
+                                (\( positionName, position ) -> Just position)
+                                namedPosition
+                                |> Maybe.withDefault Nothing
+                        )
+                        namedPositions
             in
                 update
                     (AddAndConnectMarkers positions)
-                    { model | positions = namedPositions |> Array.fromList }
+                    { model
+                        | positions =
+                            List.map
+                                (\namedPosition ->
+                                    Maybe.withDefault Position.defaultNamedPosition namedPosition
+                                )
+                                namedPositions
+                                |> Array.fromList
+                    }
 
         NewPositionGeocodes (Err _) ->
             Debug.crash "hooo"
 
         Search ->
-            let
-                positionsToGeocode =
-                    Array.toIndexedList model.positions
-                        |> List.filterMap (\( index, ( positionName, position ) ) -> Just ( index, positionName ))
-            in
-                update
-                    (Chain [ RemoveMarkers, GeoencodePositionNames positionsToGeocode ])
-                    model
+            update
+                (Chain [ RemoveMarkers, Array.toList model.positions |> GeoencodePositionNames ])
+                model
 
         AddAndConnectMarkers positions ->
             ( model, Map.addAndConnectMarkers positions )

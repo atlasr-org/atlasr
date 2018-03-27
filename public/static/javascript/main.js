@@ -58,31 +58,33 @@
                     );
                 }
 
-                layer_route_markers = LAYER_ROUTE_MARKERS_PREFIX + guid();
+                if (1 < markers.length) {
+                    layer_route_markers = LAYER_ROUTE_MARKERS_PREFIX + guid();
 
-                map.addLayer({
-                    'id': layer_route_markers,
-                    'type': 'line',
-                    'source': {
-                        'type': 'geojson',
-                        'data': {
-                            'type': 'Feature',
-                            'properties': {},
-                            'geometry': {
-                                'type': 'LineString',
-                                'coordinates': positions
+                    map.addLayer({
+                        'id': layer_route_markers,
+                        'type': 'line',
+                        'source': {
+                            'type': 'geojson',
+                            'data': {
+                                'type': 'Feature',
+                                'properties': {},
+                                'geometry': {
+                                    'type': 'LineString',
+                                    'coordinates': positions
+                                }
                             }
+                        },
+                        'layout': {
+                            'line-join': 'round',
+                            'line-cap': 'round'
+                        },
+                        'paint': {
+                            'line-color': '#00b3fd',
+                            'line-width': 8
                         }
-                    },
-                    'layout': {
-                        'line-join': 'round',
-                        'line-cap': 'round'
-                    },
-                    'paint': {
-                        'line-color': '#00b3fd',
-                        'line-width': 8
-                    }
-                });
+                    });
+                }
             }
         );
         atlasr.ports.mapboxgl_remove_markers.subscribe(

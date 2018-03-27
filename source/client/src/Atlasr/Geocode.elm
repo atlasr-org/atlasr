@@ -1,5 +1,6 @@
 module Atlasr.Geocode exposing (LongitudeLatitude, toGeocodes)
 
+import Atlasr.Position exposing (NamedPosition, defaultNamedPosition)
 import Http
 import Json.Decode
 import Task
@@ -12,17 +13,37 @@ type alias LongitudeLatitude =
     }
 
 
+{-| Allocate a default longitude-latitude.
+-}
+defaultLongitudeLatitude : LongitudeLatitude
+defaultLongitudeLatitude =
+    let
+        ( defaultName, ( defaultLongitude, defaultLatitude ) ) =
+            defaultNamedPosition
+    in
+        { label = defaultName
+        , longitude = toString defaultLongitude
+        , latitude = toString defaultLatitude
+        }
+
+
 {-| Geocode a list of position names.
 -}
-toGeocodes : (Result Http.Error (List ( Int, LongitudeLatitude )) -> msg) -> List ( Int, String ) -> Cmd msg
+toGeocodes : (Result Http.Error (List (Maybe LongitudeLatitude)) -> msg) -> List NamedPosition -> Cmd msg
 toGeocodes outputType positionsToGeocode =
     let
+        ( defaultName, defaultPosition ) =
+            defaultNamedPosition
+
         tasks =
             List.map
-                (\( index, positionName ) ->
-                    positionToGeocodeRequest positionName
-                        |> Http.toTask
-                        |> Task.map (\longitudeLatitude -> ( index, longitudeLatitude ))
+                (\( positionName, position ) ->
+                    if positionName /= defaultName then
+                        positionToGeocodeRequest positionName
+                            |> Http.toTask
+                            |> Task.map (\longitudeLatitude -> Just longitudeLatitude)
+                    else
+                        Task.succeed Nothing
                 )
                 positionsToGeocode
     in
