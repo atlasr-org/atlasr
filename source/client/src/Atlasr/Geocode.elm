@@ -25,9 +25,22 @@ toGeocodes outputType positionsToGeocode =
             List.map
                 (\( positionName, position ) ->
                     if positionName /= defaultName then
-                        positionToGeocodeRequest positionName
-                            |> Http.toTask
-                            |> Task.map (\geocode -> Just geocode)
+                        if position == defaultPosition then
+                            positionToGeocodeRequest positionName
+                                |> Http.toTask
+                                |> Task.map (\geocode -> Just geocode)
+                        else
+                            let
+                                ( longitude, latitude ) =
+                                    position
+
+                                geocode =
+                                    { label = positionName
+                                    , longitude = toString longitude
+                                    , latitude = toString latitude
+                                    }
+                            in
+                                Task.succeed (Just geocode)
                     else
                         Task.succeed Nothing
                 )
