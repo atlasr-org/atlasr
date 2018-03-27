@@ -94,7 +94,7 @@ view model =
 type Msg
     = NewPositionName Int String
     | GeoencodePositionNames (List NamedPosition)
-    | NewPositionGeocodes (Result Http.Error (List (Maybe Geocode.LongitudeLatitude)))
+    | NewPositionGeocodes (Result Http.Error (List (Maybe Geocode.Geocode)))
     | Search
     | AddAndConnectMarkers (List Position)
     | RemoveMarkers

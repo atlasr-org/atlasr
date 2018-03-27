@@ -1,4 +1,4 @@
-module Atlasr.Geocode exposing (LongitudeLatitude, toGeocodes)
+module Atlasr.Geocode exposing (Geocode, toGeocodes)
 
 import Atlasr.Position exposing (NamedPosition, defaultNamedPosition)
 import Http
@@ -6,7 +6,7 @@ import Json.Decode
 import Task
 
 
-type alias LongitudeLatitude =
+type alias Geocode =
     { label : String
     , longitude : String
     , latitude : String
@@ -15,7 +15,7 @@ type alias LongitudeLatitude =
 
 {-| Geocode a list of position names.
 -}
-toGeocodes : (Result Http.Error (List (Maybe LongitudeLatitude)) -> msg) -> List NamedPosition -> Cmd msg
+toGeocodes : (Result Http.Error (List (Maybe Geocode)) -> msg) -> List NamedPosition -> Cmd msg
 toGeocodes outputType positionsToGeocode =
     let
         ( defaultName, defaultPosition ) =
@@ -27,7 +27,7 @@ toGeocodes outputType positionsToGeocode =
                     if positionName /= defaultName then
                         positionToGeocodeRequest positionName
                             |> Http.toTask
-                            |> Task.map (\longitudeLatitude -> Just longitudeLatitude)
+                            |> Task.map (\geocode -> Just geocode)
                     else
                         Task.succeed Nothing
                 )
@@ -38,7 +38,7 @@ toGeocodes outputType positionsToGeocode =
 
 {-| Create an HTTP request to geocode a position.
 -}
-positionToGeocodeRequest : String -> Http.Request LongitudeLatitude
+positionToGeocodeRequest : String -> Http.Request Geocode
 positionToGeocodeRequest positionName =
     let
         url =
@@ -49,11 +49,11 @@ positionToGeocodeRequest positionName =
 
 {-| Decoder for the geocode payload from the HTTP service.
 -}
-decodeGeocode : Json.Decode.Decoder LongitudeLatitude
+decodeGeocode : Json.Decode.Decoder Geocode
 decodeGeocode =
     Json.Decode.at [ "0" ]
         (Json.Decode.map3
-            LongitudeLatitude
+            Geocode
             (Json.Decode.field "display_name" Json.Decode.string)
             (Json.Decode.field "lon" Json.Decode.string)
             (Json.Decode.field "lat" Json.Decode.string)
