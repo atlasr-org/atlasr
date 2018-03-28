@@ -5,6 +5,7 @@ import Atlasr.Map as Map
 import Atlasr.MapboxGL.Options as MapOptions
 import Atlasr.Position as Position
 import Atlasr.Position exposing (Position, NamedPosition)
+import Atlasr.Route as Route
 import Array exposing (Array)
 import Html exposing (..)
 import Html.Attributes exposing (..)
@@ -95,9 +96,12 @@ type Msg
     = NewPositionName Int String
     | GeoencodePositionNames (List NamedPosition)
     | NewPositionGeocodes (Result Http.Error (List (Maybe Geocode.Geocode)))
+    | GetRoute (List Position)
+    | NewPositionRoute (Result Http.Error Route.Route)
     | Search
-    | AddAndConnectMarkers (List Position)
+    | AddMarkers (List Position)
     | RemoveMarkers
+    | ConnectMarkers (List Position)
     | FlyTo Position
     | Chain (List Msg)
 
@@ -151,7 +155,7 @@ update msg model =
                         namedPositions
             in
                 update
-                    (AddAndConnectMarkers positions)
+                    (Chain [ AddMarkers positions, GetRoute positions ])
                     { model
                         | positions =
                             List.map
@@ -163,18 +167,32 @@ update msg model =
                     }
 
         NewPositionGeocodes (Err _) ->
-            Debug.crash "hooo"
+            Debug.crash "[geocode] hooo"
+
+        GetRoute positions ->
+            ( model, Route.toRoute NewPositionRoute positions )
+
+        NewPositionRoute (Ok route) ->
+            update
+                (ConnectMarkers route.points)
+                model
+
+        NewPositionRoute (Err _) ->
+            Debug.crash "[route] hooo"
 
         Search ->
             update
                 (Chain [ RemoveMarkers, Array.toList model.positions |> GeoencodePositionNames ])
                 model
 
-        AddAndConnectMarkers positions ->
-            ( model, Map.addAndConnectMarkers positions )
+        AddMarkers positions ->
+            ( model, Map.addMarkers positions )
 
         RemoveMarkers ->
             ( model, Map.removeMarkers )
+
+        ConnectMarkers positions ->
+            ( model, Map.connectMarkers positions )
 
         FlyTo position ->
             ( model, Map.flyTo position )

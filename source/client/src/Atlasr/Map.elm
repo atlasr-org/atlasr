@@ -21,9 +21,9 @@ flyTo position =
 
 {-| Add markers to certain positions, and connect them.
 -}
-addAndConnectMarkers : List Position -> Cmd msg
-addAndConnectMarkers positions =
-    mapboxgl_add_and_connect_markers positions
+addMarkers : List Position -> Cmd msg
+addMarkers positions =
+    mapboxgl_add_markers positions
 
 
 {-| Remove all markers.
@@ -31,3 +31,10 @@ addAndConnectMarkers positions =
 removeMarkers : Cmd msg
 removeMarkers =
     mapboxgl_remove_markers ()
+
+
+{-| Draw lines between points/positions.
+-}
+connectMarkers : List Position -> Cmd msg
+connectMarkers positions =
+    mapboxgl_connect_markers positions

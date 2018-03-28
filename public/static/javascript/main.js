@@ -48,7 +48,7 @@
                 map.flyTo(cameraOptions);
             }
         );
-        atlasr.ports.mapboxgl_add_and_connect_markers.subscribe(
+        atlasr.ports.mapboxgl_add_markers.subscribe(
             (positions) => {
                 for (let [longitude, latitude] of positions) {
                     markers.push(
@@ -57,8 +57,24 @@
                             .addTo(map)
                     );
                 }
+            }
+        );
+        atlasr.ports.mapboxgl_remove_markers.subscribe(
+            () => {
+                for (let marker of markers) {
+                    marker.remove();
+                }
 
-                if (1 < markers.length) {
+                markers = [];
+
+                if (undefined !== map.getLayer(layer_route_markers)) {
+                    map.removeLayer(layer_route_markers);
+                }
+            }
+        );
+        atlasr.ports.mapboxgl_connect_markers.subscribe(
+            (positions) => {
+                if (1 < positions.length) {
                     layer_route_markers = LAYER_ROUTE_MARKERS_PREFIX + guid();
 
                     map.addLayer({
@@ -84,19 +100,6 @@
                             'line-width': 8
                         }
                     });
-                }
-            }
-        );
-        atlasr.ports.mapboxgl_remove_markers.subscribe(
-            () => {
-                for (let marker of markers) {
-                    marker.remove();
-                }
-
-                markers = [];
-
-                if (undefined !== map.getLayer(layer_route_markers)) {
-                    map.removeLayer(layer_route_markers);
                 }
             }
         );
