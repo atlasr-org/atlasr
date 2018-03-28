@@ -45,7 +45,7 @@ uninstall-api-graphhopper:
 
 # Run GraphHopper for a particular PBF zone.
 run-api-graphhopper map_file='europe_switzerland': install-api-graphhopper
-	source/api/graphhopper/graphhopper.sh web {{map_file}}.pbf
+	cd source/api/graphhopper && ./graphhopper.sh web {{map_file}}.pbf
 
 # Install client.
 install-client: install-client-index install-client-application install-client-dependencies
