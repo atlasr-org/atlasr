@@ -22,24 +22,32 @@ type alias Point =
     }
 
 
+emptyRoute : Route
+emptyRoute =
+    { points = [] }
+
+
 {-| Get a route from a list of position.
 -}
 toRoute : (Result Http.Error Route -> msg) -> List Position -> Cmd msg
 toRoute outputType positions =
     let
         task =
-            positionsToRouteRequest positions
-                |> Http.toTask
-                |> Task.map
-                    (\route ->
-                        Route
-                            (List.map
-                                (\point ->
-                                    ( point.longitude, point.latitude )
+            if List.length positions <= 1 then
+                Task.succeed emptyRoute
+            else
+                positionsToRouteRequest positions
+                    |> Http.toTask
+                    |> Task.map
+                        (\route ->
+                            Route
+                                (List.map
+                                    (\point ->
+                                        ( point.longitude, point.latitude )
+                                    )
+                                    route.points
                                 )
-                                route.points
-                            )
-                    )
+                        )
     in
         Task.attempt outputType task
 
