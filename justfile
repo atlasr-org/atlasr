@@ -27,7 +27,7 @@ uninstall-server:
 
 # Run the HTTP server (will not exit).
 run-server:
-	cd source/server && cargo run
+	cd source/server && cargo run --release
 
 # Install all the APIs.
 install-api: install-api-graphhopper
