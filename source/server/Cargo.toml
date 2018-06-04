@@ -4,4 +4,5 @@ version = "0.0.1"
 authors = ["Ivan Enderlin <ivan.enderlin@hoa-project.net>"]
 
 [dependencies]
-actix-web = "^0.6"
+actix-web = "^0.6.10"
+futures = "^0.1.21"

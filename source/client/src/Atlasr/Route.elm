@@ -58,7 +58,7 @@ positionsToRouteRequest : List Position -> Http.Request RawRoute
 positionsToRouteRequest positions =
     let
         url =
-            "http://localhost:8989/route"
+            "/api/route"
                 ++ "?points_encoded=false"
                 ++ "&vehicle=car"
                 ++ List.foldl

@@ -1,13 +1,18 @@
 extern crate actix_web;
+extern crate futures;
 
 use actix_web::{
     App,
     HttpRequest,
+    HttpResponse,
     Result,
+    dev::HttpResponseBuilder,
     fs::NamedFile,
     http::Method,
+    client,
     server,
 };
+use futures::Future;
 use std::path::PathBuf;
 
 macro_rules! ROOT_DIRECTORY { () => { "../../public/" }; }
@@ -20,6 +25,22 @@ fn serve_static_files(request: HttpRequest) -> Result<NamedFile> {
     path.push(tail);
 
     Ok(NamedFile::open(path)?)
+}
+
+fn serve_api_route(request: HttpRequest) -> impl Future<Item=HttpResponse, Error=client::SendRequestError> {
+    client
+        ::get(format!("http://localhost:8989/route?{}", request.query_string()))
+        .finish()
+        .unwrap()
+        .send()
+        .map(
+            |client_response| {
+                HttpResponseBuilder
+                    ::from(&client_response)
+                    .chunked()
+                    .streaming(client_response)
+            }
+        )
 }
 
 fn serve_index(_request: HttpRequest) -> Result<NamedFile> {
@@ -37,11 +58,36 @@ fn main() {
                 vec![
                     App::new()
                         .prefix("/static")
-                        .route(r"/{tail:.*}", Method::GET, serve_static_files),
+                        .resource(
+                            r"/{tail:.*}",
+                            |resource| {
+                                resource.method(Method::GET).f(serve_static_files)
+                            }
+                        ),
+
+                    App::new()
+                        .prefix("/api")
+                        .resource(
+                            "/route",
+                            |resource| {
+                                resource.method(Method::GET).a(serve_api_route)
+                            }
+                        ),
+
                     App::new()
                         .prefix("/")
-                        .route("/index.html", Method::GET, serve_index)
-                        .route("/", Method::GET, serve_index)
+                        .resource(
+                            "/index.html",
+                            |resource| {
+                                resource.method(Method::GET).f(serve_index)
+                            }
+                        )
+                        .resource(
+                            "/",
+                            |resource| {
+                                resource.method(Method::GET).f(serve_index)
+                            }
+                        )
                 ]
             }
         )
