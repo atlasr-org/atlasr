@@ -1,4 +1,5 @@
 mapbox_gl_js_version = "0.44.1"
+routing_server_uri = "http://localhost:8989"
 
 # Open Atlasr in your favorite browser.
 open: install
@@ -15,7 +16,9 @@ uninstall: uninstall-server uninstall-api uninstall-client
 
 # Install the HTTP server.
 install-server:
-	cd source/server && cargo build --release
+	cd source/server && \
+	    ROUTING_SERVER_URI={{routing_server_uri}} \
+	    cargo build --release
 
 # Test the HTTP server.
 test-server:
@@ -26,7 +29,7 @@ uninstall-server:
 	rm -rf source/server/Cargo.lock source/server/target
 
 # Run the HTTP server (will not exit).
-run-server:
+run-server: install-server
 	cd source/server && cargo run --release
 
 # Install all the APIs.
