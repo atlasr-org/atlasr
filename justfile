@@ -1,5 +1,6 @@
 mapbox_gl_js_version = "0.44.1"
 route_api_uri = "http://localhost:8989"
+geocode_data_planet = "https://github.com/OSMNames/OSMNames/releases/download/v2.0.4/planet-latest-100k_geonames.tsv.gz"
 
 # Open Atlasr in your favorite browser.
 open: install
@@ -33,22 +34,38 @@ run-server: install-server
 	cd source/server && cargo run --release
 
 # Install all the APIs.
-install-api: install-api-route
+install-api: install-api-route install-api-geocode
 
 # Uninstall all the APIs.
-uninstall-api: uninstall-api-route
+uninstall-api: uninstall-api-route uninstall-api-geocode
 
-# Install route API (GraphHopper).
+# Install the route API (GraphHopper).
 install-api-route:
 	git submodule update --init source/api/route
 
-# Uninstall route API (GraphHopper).
+# Uninstall the route API (GraphHopper).
 uninstall-api-route:
 	# noop
 
-# Run route API (GraphHopper) for a particular PBF zone.
+# Run the route API (GraphHopper) for a particular PBF zone.
 run-api-route map_file='europe_switzerland': install-api-route
 	cd source/api/route && ./graphhopper.sh web {{map_file}}.pbf
+
+# Install the geocode API.
+install-api-geocode: install-api-geocode-data install-api-geocode-indexer
+
+# 
+install-api-geocode-indexer:
+	cd source/api/geocode/indexer && cargo +nightly build --release
+
+# Install/download data for the geocode API.
+install-api-geocode-data:
+	cd source/api/geocode && \
+		curl -L {{geocode_data_planet}} > planet.tsv.gz && \
+		gzip -d planet.tsv.gz
+
+uninstall-api-geocode:
+	# noop
 
 # Install client.
 install-client: install-client-index install-client-application install-client-dependencies

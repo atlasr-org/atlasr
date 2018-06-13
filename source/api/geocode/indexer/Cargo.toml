@@ -1,0 +1,12 @@
+[package]
+name = "atlasr-api-geocode-indexer"
+version = "0.1.0"
+authors = ["Ivan Enderlin <ivan.enderlin@hoa-project.net>"]
+
+[dependencies]
+tantivy = "^0.5.2"
+clap = "^2.31.2"
+failure = "^0.1.1"
+csv = "^1.0.0"
+serde = "^1.0.66"
+serde_derive = "^1.0.66"
