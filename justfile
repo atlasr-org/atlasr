@@ -33,22 +33,22 @@ run-server: install-server
 	cd source/server && cargo run --release
 
 # Install all the APIs.
-install-api: install-api-graphhopper
+install-api: install-api-route
 
 # Uninstall all the APIs.
-uninstall-api: uninstall-api-graphhopper
+uninstall-api: uninstall-api-route
 
-# Install GraphHopper.
-install-api-graphhopper:
-	git submodule update --init source/api/graphhopper
+# Install route API (GraphHopper).
+install-api-route:
+	git submodule update --init source/api/route
 
-# Uninstall GraphHopper.
-uninstall-api-graphhopper:
+# Uninstall route API (GraphHopper).
+uninstall-api-route:
 	# noop
 
-# Run GraphHopper for a particular PBF zone.
-run-api-graphhopper map_file='europe_switzerland': install-api-graphhopper
-	cd source/api/graphhopper && ./graphhopper.sh web {{map_file}}.pbf
+# Run route API (GraphHopper) for a particular PBF zone.
+run-api-route map_file='europe_switzerland': install-api-route
+	cd source/api/route && ./graphhopper.sh web {{map_file}}.pbf
 
 # Install client.
 install-client: install-client-index install-client-application install-client-dependencies
