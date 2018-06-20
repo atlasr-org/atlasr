@@ -12,6 +12,7 @@ use clap::{App, Arg};
 use tantivy::{
     Index,
     IndexWriter,
+    directory,
     schema::*
 };
 use std::fs::File;
@@ -64,7 +65,7 @@ fn create_schema() -> Schema {
     schema_builder.build()
 }
 
-fn create_index(index_directory: &Path, schema: &Schema) -> Index {
+fn create_index(index_directory: directory::MmapDirectory, schema: &Schema) -> Index {
     Index::create(index_directory, schema.clone()).unwrap()
 }
 
@@ -126,7 +127,7 @@ fn main() -> Result<(), Error> {
 
     let index_directory = matches.value_of("index-directory").unwrap();
     let schema = create_schema();
-    let index = create_index(Path::new(index_directory), &schema);
+    let index = create_index(directory::MmapDirectory::open(index_directory)?, &schema);
     let mut index_writer = index.writer(50_000_000)?;
 
     for record in source_reader.deserialize() {

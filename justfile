@@ -52,17 +52,21 @@ run-api-route map_file='europe_switzerland': install-api-route
 	cd source/api/route && ./graphhopper.sh web {{map_file}}.pbf
 
 # Install the geocode API.
-install-api-geocode: install-api-geocode-data install-api-geocode-indexer
-
-# 
-install-api-geocode-indexer:
-	cd source/api/geocode/indexer && cargo +nightly build --release
+install-api-geocode: install-api-geocode-data install-api-geocode-indexer install-api-geocode-searcher
 
 # Install/download data for the geocode API.
 install-api-geocode-data:
 	cd source/api/geocode && \
 		curl -L {{geocode_data_planet}} > planet.tsv.gz && \
 		gzip -d planet.tsv.gz
+
+# Install the indexer for the geocode API.
+install-api-geocode-indexer:
+	cd source/api/geocode/indexer && cargo build --release
+
+# Install the searcher for the geocode API.
+install-api-geocode-searcher:
+	cd source/api/geocode/indexer && cargo build --release
 
 uninstall-api-geocode:
 	# noop

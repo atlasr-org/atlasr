@@ -2,7 +2,9 @@
 /public/static/index.html
 /public/static/javascript/*.elm.js
 /public/static/javascript/mapbox-gl.*
+/source/api/geocode/indexer/target/
+/source/api/geocode/searcher/target/
 /source/client/elm-stuff
 /source/client/tests/elm-stuff
-/source/server/Cargo.lock
 /source/server/target
+Cargo.lock
