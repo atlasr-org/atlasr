@@ -4,5 +4,5 @@ version = "0.1.0"
 authors = ["Ivan Enderlin <ivan.enderlin@hoa-project.net>"]
 
 [dependencies]
-tantivy = { git = "https://github.com/tantivy-search/tantivy", branch = "master" }
+tantivy = "^0.6"
 actix-web = "^0.6.10"
