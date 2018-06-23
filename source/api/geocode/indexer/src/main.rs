@@ -22,6 +22,7 @@ use std::io::{
     Write
 };
 
+/// [Definition of these fields](http://osmnames.readthedocs.io/en/latest/introduction.html#output-format).
 #[derive(Debug, Deserialize)]
 struct Record {
     name: String,
