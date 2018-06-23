@@ -16,7 +16,11 @@ use tantivy::{
     schema::*
 };
 use std::fs::File;
-use std::io::BufReader;
+use std::io::{
+    self,
+    BufReader,
+    Write
+};
 
 #[derive(Debug, Deserialize)]
 struct Record {
@@ -69,8 +73,6 @@ fn create_index(index_directory: directory::MmapDirectory, schema: &Schema) -> I
 }
 
 fn index_record(index_writer: &mut IndexWriter, schema: &Schema, record: Record) -> tantivy::Result<()> {
-    println!("~~> {:?}", record.name);
-
     let field_name = schema.get_field("name").unwrap();
     let field_alternative_names = schema.get_field("alternative_names").unwrap();
     let field_longitude = schema.get_field("longitude").unwrap();
@@ -128,9 +130,15 @@ fn main() -> Result<(), Error> {
     let schema = create_schema();
     let index = create_index(directory::MmapDirectory::open(index_directory)?, &schema);
     let mut index_writer = index.writer(50_000_000)?;
+    let stdout = io::stdout();
+    let mut handle = stdout.lock();
 
     for record in source_reader.deserialize() {
         let record: Record = record?;
+
+        handle.write(b"~~> ").unwrap();
+        handle.write(record.name.as_bytes()).unwrap();
+        handle.write(b"\n").unwrap();
 
         index_record(&mut index_writer, &schema, record)?;
     }
