@@ -1,5 +1,5 @@
 mapbox_gl_js_version = "0.44.1"
-route_api_uri = "http://localhost:8989"
+route_api_url = "http://localhost:8989"
 geocode_data_planet = "https://github.com/OSMNames/OSMNames/releases/download/v2.0.4/planet-latest-100k_geonames.tsv.gz"
 
 # Open Atlasr in your favorite browser.
@@ -18,7 +18,7 @@ uninstall: uninstall-server uninstall-api uninstall-client
 # Install the HTTP server.
 install-server:
 	cd source/server && \
-	    ROUTE_API_URI={{route_api_uri}} \
+	    ROUTE_API_URL={{route_api_url}} \
 	    cargo build --release
 
 # Test the HTTP server.

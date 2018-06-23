@@ -17,7 +17,7 @@ use std::path::PathBuf;
 
 macro_rules! ROOT_DIRECTORY { () => { "../../public/" }; }
 const STATIC_DIRECTORY: &'static str = concat!(ROOT_DIRECTORY!(), "static/");
-const ROUTE_API_URI: &'static str = env!("ROUTE_API_URI");
+const ROUTE_API_URL: &'static str = env!("ROUTE_API_URL");
 
 fn serve_static_files(request: HttpRequest) -> Result<NamedFile> {
     let mut path: PathBuf = PathBuf::from(STATIC_DIRECTORY);
@@ -30,7 +30,7 @@ fn serve_static_files(request: HttpRequest) -> Result<NamedFile> {
 
 fn serve_api_route(request: HttpRequest) -> impl Future<Item=HttpResponse, Error=client::SendRequestError> {
     client
-        ::get(format!("{}/route?{}", ROUTE_API_URI, request.query_string()))
+        ::get(format!("{}/route?{}", ROUTE_API_URL, request.query_string()))
         .finish()
         .unwrap()
         .send()
