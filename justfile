@@ -1,10 +1,12 @@
 mapbox_gl_js_version = "0.44.1"
-route_api_url = "http://localhost:8989"
+server_address = "localhost:8889"
+geocode_api_address = "localhost:8990"
+route_api_address = "localhost:8989"
 geocode_data_planet = "https://github.com/OSMNames/OSMNames/releases/download/v2.0.4/planet-latest-100k_geonames.tsv.gz"
 
 # Open Atlasr in your favorite browser.
 open: install
-	open http://127.0.0.1:8889
+	open http://{{server_address}}
 
 # Install Atlasr!
 install: install-server install-api install-client
@@ -18,8 +20,10 @@ uninstall: uninstall-server uninstall-api uninstall-client
 # Install the HTTP server.
 install-server:
 	cd source/server && \
-	    ROUTE_API_URL={{route_api_url}} \
-	    cargo build --release
+		SERVER_ADDRESS={{server_address}} \
+		ROUTE_API_ADDRESS={{route_api_address}} \
+		GEOCODE_API_ADDRESS={{geocode_api_address}} \
+		cargo build --release
 
 # Test the HTTP server.
 test-server:
@@ -34,22 +38,10 @@ run-server: install-server
 	cd source/server && cargo run --release
 
 # Install all the APIs.
-install-api: install-api-route install-api-geocode
+install-api: install-api-geocode install-api-route
 
 # Uninstall all the APIs.
-uninstall-api: uninstall-api-route uninstall-api-geocode
-
-# Install the route API (GraphHopper).
-install-api-route:
-	git submodule update --init source/api/route
-
-# Uninstall the route API (GraphHopper).
-uninstall-api-route:
-	# noop
-
-# Run the route API (GraphHopper) for a particular PBF zone.
-run-api-route map_file='europe_switzerland': install-api-route
-	cd source/api/route && ./graphhopper.sh web {{map_file}}.pbf
+uninstall-api: uninstall-api-geocode uninstall-api-route
 
 # Install the geocode API.
 install-api-geocode: install-api-geocode-data install-api-geocode-indexer install-api-geocode-searcher
@@ -66,10 +58,27 @@ install-api-geocode-indexer:
 
 # Install the searcher for the geocode API.
 install-api-geocode-searcher:
-	cd source/api/geocode/indexer && cargo build --release
+	cd source/api/geocode/searcher && \
+		GEOCODE_API_ADDRESS={{geocode_api_address}} \
+		cargo build --release
 
 uninstall-api-geocode:
 	# noop
+
+run-api-geocode-searcher:
+	cd source/api/geocode/searcher && cargo run --release
+
+# Install the route API (GraphHopper).
+install-api-route:
+	git submodule update --init source/api/route
+
+# Uninstall the route API (GraphHopper).
+uninstall-api-route:
+	# noop
+
+# Run the route API (GraphHopper) for a particular PBF zone.
+run-api-route map_file='europe_switzerland': install-api-route
+	cd source/api/route && ./graphhopper.sh web {{map_file}}.pbf
 
 # Install client.
 install-client: install-client-index install-client-application install-client-dependencies

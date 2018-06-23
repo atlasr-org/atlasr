@@ -15,6 +15,8 @@ use tantivy::{
     query::QueryParser
 };
 
+const GEOCODE_API_ADDRESS: &'static str = env!("GEOCODE_API_ADDRESS");
+
 struct SearchState {
     index: Index,
     query_parser: QueryParser
@@ -118,8 +120,8 @@ fn main() {
                     )
             }
         )
-        .bind("127.0.0.1:8887")
-        .expect("Cannot bind the server to 127.0.0.1:8887.")
+        .bind(GEOCODE_API_ADDRESS)
+        .expect(&format!("Cannot bind the server to {}.", GEOCODE_API_ADDRESS))
         .shutdown_timeout(30)
         .run();
 }

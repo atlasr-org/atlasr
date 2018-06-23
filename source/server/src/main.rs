@@ -17,7 +17,9 @@ use std::path::PathBuf;
 
 macro_rules! ROOT_DIRECTORY { () => { "../../public/" }; }
 const STATIC_DIRECTORY: &'static str = concat!(ROOT_DIRECTORY!(), "static/");
-const ROUTE_API_URL: &'static str = env!("ROUTE_API_URL");
+const SERVER_ADDRESS: &'static str = env!("SERVER_ADDRESS");
+const ROUTE_API_ADDRESS: &'static str = env!("ROUTE_API_ADDRESS");
+const GEOCODE_API_ADDRESS: &'static str = env!("GEOCODE_API_ADDRESS");
 
 fn serve_static_files(request: HttpRequest) -> Result<NamedFile> {
     let mut path: PathBuf = PathBuf::from(STATIC_DIRECTORY);
@@ -28,9 +30,25 @@ fn serve_static_files(request: HttpRequest) -> Result<NamedFile> {
     Ok(NamedFile::open(path)?)
 }
 
+fn serve_api_geocode(request: HttpRequest) -> impl Future<Item=HttpResponse, Error=client::SendRequestError> {
+    client
+        ::get(format!("http://{}/search/{}", GEOCODE_API_ADDRESS, request.match_info().get("term").unwrap()))
+        .finish()
+        .unwrap()
+        .send()
+        .map(
+            |client_response| {
+                HttpResponseBuilder
+                    ::from(&client_response)
+                    .chunked()
+                    .streaming(client_response)
+            }
+        )
+}
+
 fn serve_api_route(request: HttpRequest) -> impl Future<Item=HttpResponse, Error=client::SendRequestError> {
     client
-        ::get(format!("{}/route?{}", ROUTE_API_URL, request.query_string()))
+        ::get(format!("http://{}/route?{}", ROUTE_API_ADDRESS, request.query_string()))
         .finish()
         .unwrap()
         .send()
@@ -69,6 +87,12 @@ fn main() {
                     App::new()
                         .prefix("/api")
                         .resource(
+                            "/geocode/{term}",
+                            |resource| {
+                                resource.method(Method::GET).a(serve_api_geocode)
+                            }
+                        )
+                        .resource(
                             "/route",
                             |resource| {
                                 resource.method(Method::GET).a(serve_api_route)
@@ -92,8 +116,8 @@ fn main() {
                 ]
             }
         )
-        .bind("127.0.0.1:8889")
-        .expect("Cannot bind the server to 127.0.0.1:8889.")
+        .bind(SERVER_ADDRESS)
+        .expect(&format!("Cannot bind the server to {}.", SERVER_ADDRESS))
         .shutdown_timeout(30)
         .run();
 }
