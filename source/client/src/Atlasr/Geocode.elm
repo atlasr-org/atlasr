@@ -55,7 +55,7 @@ positionToGeocodeRequest : String -> Http.Request Geocode
 positionToGeocodeRequest positionName =
     let
         url =
-            "https://nominatim.openstreetmap.org/search?format=json&limit=1&q=" ++ positionName
+            "/api/geocode/" ++ positionName
     in
         Http.get url decodeGeocode
 
@@ -67,7 +67,7 @@ decodeGeocode =
     Json.Decode.at [ "0" ]
         (Json.Decode.map3
             Geocode
-            (Json.Decode.field "display_name" Json.Decode.string)
-            (Json.Decode.field "lon" Json.Decode.string)
-            (Json.Decode.field "lat" Json.Decode.string)
+            (Json.Decode.at [ "name", "0" ] Json.Decode.string)
+            (Json.Decode.at [ "longitude", "0" ] Json.Decode.string)
+            (Json.Decode.at [ "latitude", "0" ] Json.Decode.string)
         )
