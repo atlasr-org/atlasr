@@ -32,7 +32,7 @@ fn serve_static_files(request: HttpRequest) -> Result<NamedFile> {
 
 fn serve_api_geocode(request: HttpRequest) -> impl Future<Item=HttpResponse, Error=client::SendRequestError> {
     client
-        ::get(format!("http://{}/search/{}", GEOCODE_API_ADDRESS, request.match_info().get("term").unwrap()))
+        ::get(format!("http://{}/search?{}", GEOCODE_API_ADDRESS, request.query_string()))
         .finish()
         .unwrap()
         .send()
@@ -87,7 +87,7 @@ fn main() {
                     App::new()
                         .prefix("/api")
                         .resource(
-                            "/geocode/{term}",
+                            "/geocode",
                             |resource| {
                                 resource.method(Method::GET).a(serve_api_geocode)
                             }

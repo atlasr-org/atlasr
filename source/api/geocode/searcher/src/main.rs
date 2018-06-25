@@ -14,6 +14,7 @@ use tantivy::{
     directory,
     query::QueryParser
 };
+use std::cmp::min;
 
 const GEOCODE_API_ADDRESS: &'static str = env!("GEOCODE_API_ADDRESS");
 
@@ -25,15 +26,15 @@ struct SearchState {
 fn serve_search(request: HttpRequest<SearchState>) -> HttpResponse {
     let term: &str;
 
-    match request.match_info().get("term") {
-        Some(value) => {
-            term = value;
-        },
-
-        None => {
-            return HttpResponse::BadRequest().reason("`term` is missing").finish();
-        }
+    match request.query().get("term") {
+        Some(value) => term = value,
+        None => return HttpResponse::BadRequest().reason("Query `term` is missing").finish()
     }
+
+    let limit: u8 = match request.query().get("limit") {
+        Some(value) => min(value.parse().unwrap_or(3), 10),
+        None => 3
+    };
 
     let index = &request.state().index;
     let query_parser = &request.state().query_parser;
@@ -51,7 +52,7 @@ fn serve_search(request: HttpRequest<SearchState>) -> HttpResponse {
         }
     };
 
-    let mut top_collector = TopCollector::with_limit(10);
+    let mut top_collector = TopCollector::with_limit(limit as usize);
 
     match searcher.search(&*query, &mut top_collector) {
         Err(_) => {
@@ -113,7 +114,7 @@ fn main() {
                         }
                     )
                     .resource(
-                        "/search/{term}",
+                        "/search", // ?term=…&limit=…
                         |resource| {
                             resource.method(Method::GET).f(serve_search)
                         }

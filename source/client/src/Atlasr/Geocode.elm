@@ -55,7 +55,7 @@ positionToGeocodeRequest : String -> Http.Request Geocode
 positionToGeocodeRequest positionName =
     let
         url =
-            "/api/geocode/" ++ positionName
+            "/api/geocode?term=" ++ positionName ++ "&limit=1"
     in
         Http.get url decodeGeocode
 
