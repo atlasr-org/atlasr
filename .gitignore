@@ -2,6 +2,8 @@
 /public/static/index.html
 /public/static/javascript/*.elm.js
 /public/static/javascript/mapbox-gl.*
+/source/api/geocode/*.tsv
+/source/api/geocode/index/
 /source/api/geocode/indexer/target/
 /source/api/geocode/searcher/target/
 /source/client/elm-stuff
