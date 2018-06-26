@@ -33,9 +33,9 @@ struct Record {
     #[serde(rename = "type")]
     object_type: String,
     #[serde(rename = "lon")]
-    longitude: f64,
+    longitude: Option<f64>,
     #[serde(rename = "lat")]
-    latitude: f64,
+    latitude: Option<f64>,
     place_rank: Option<u64>,
     importance: f64,
     street: Option<String>,
@@ -46,23 +46,43 @@ struct Record {
     country_code: Option<String>,
     display_name: String,
     #[serde(rename = "west")]
-    bbox_west: f64,
+    bbox_west: Option<f64>,
     #[serde(rename = "south")]
-    bbox_south: f64,
+    bbox_south: Option<f64>,
     #[serde(rename = "east")]
-    bbox_east: f64,
+    bbox_east: Option<f64>,
     #[serde(rename = "north")]
-    bbox_north: f64,
+    bbox_north: Option<f64>,
     wikidata: Option<String>,
     wikipedia: Option<String>,
     housenumbers: Option<String>
 }
 
+impl Record {
+    fn indexable(&self) -> bool {
+        if self.longitude.is_none() || self.latitude.is_none() {
+            return false;
+        }
+
+        match (self.class.as_str(), self.object_type.as_str()) {
+            ("boundary", _) |
+            ("highway", "residential") => {
+                return true;
+            },
+
+            (_, _) => { }
+        }
+
+        false
+    }
+}
+
 fn create_schema() -> Schema {
     let mut schema_builder = SchemaBuilder::default();
 
-    schema_builder.add_text_field("name", TEXT | STORED);
-    schema_builder.add_text_field("alternative_names", TEXT);
+    schema_builder.add_text_field("display_name", TEXT | STORED);
+    schema_builder.add_text_field("class", STORED);
+    schema_builder.add_text_field("type", STORED);
     schema_builder.add_text_field("longitude", STORED);
     schema_builder.add_text_field("latitude", STORED);
 
@@ -74,16 +94,22 @@ fn create_index(index_directory: directory::MmapDirectory, schema: &Schema) -> I
 }
 
 fn index_record(index_writer: &mut IndexWriter, schema: &Schema, record: Record) -> tantivy::Result<()> {
-    let field_name = schema.get_field("name").unwrap();
-    let field_alternative_names = schema.get_field("alternative_names").unwrap();
+    if ! record.indexable() {
+        return Ok(());
+    }
+
+    let field_display_name = schema.get_field("display_name").unwrap();
+    let field_class = schema.get_field("class").unwrap();
+    let field_type = schema.get_field("type").unwrap();
     let field_longitude = schema.get_field("longitude").unwrap();
     let field_latitude = schema.get_field("latitude").unwrap();
 
     let mut document = Document::default();
-    document.add_text(field_name, &record.name);
-    document.add_text(field_alternative_names, &record.alternative_names.unwrap_or("".into()));
-    document.add_text(field_longitude, &record.longitude.to_string());
-    document.add_text(field_latitude, &record.latitude.to_string());
+    document.add_text(field_display_name, &record.display_name);
+    document.add_text(field_class, &record.class);
+    document.add_text(field_type, &record.object_type);
+    document.add_text(field_longitude, &record.longitude.unwrap().to_string());
+    document.add_text(field_latitude, &record.latitude.unwrap().to_string());
 
     index_writer.add_document(document);
 

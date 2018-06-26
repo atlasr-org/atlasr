@@ -95,15 +95,14 @@ fn main() {
                 App
                     ::with_state(
                         {
-                            let index = Index::open(directory::MmapDirectory::open("../test").unwrap()).unwrap();
+                            let index = Index::open(directory::MmapDirectory::open("../index").unwrap()).unwrap();
                             index.load_searchers().unwrap();
 
                             let schema = index.schema();
                             let query_parser = QueryParser::for_index(
                                 &index,
                                 vec![
-                                    schema.get_field("name").unwrap(),
-                                    schema.get_field("alternative_names").unwrap()
+                                    schema.get_field("display_name").unwrap()
                                 ]
                             );
 

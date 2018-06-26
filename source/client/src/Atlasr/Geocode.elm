@@ -67,7 +67,7 @@ decodeGeocode =
     Json.Decode.at [ "0" ]
         (Json.Decode.map3
             Geocode
-            (Json.Decode.at [ "name", "0" ] Json.Decode.string)
+            (Json.Decode.at [ "display_name", "0" ] Json.Decode.string)
             (Json.Decode.at [ "longitude", "0" ] Json.Decode.string)
             (Json.Decode.at [ "latitude", "0" ] Json.Decode.string)
         )

@@ -2,7 +2,7 @@ mapbox_gl_js_version = "0.44.1"
 server_address = "localhost:8889"
 geocode_api_address = "localhost:8990"
 route_api_address = "localhost:8989"
-geocode_data_planet = "https://github.com/OSMNames/OSMNames/releases/download/v2.0.4/planet-latest-100k_geonames.tsv.gz"
+geocode_data_planet = "https://github.com/OSMNames/OSMNames/releases/download/v2.0.4/planet-latest_geonames.tsv.gz"
 
 # Open Atlasr in your favorite browser.
 open: install
@@ -47,10 +47,12 @@ uninstall-api: uninstall-api-geocode uninstall-api-route
 install-api-geocode: install-api-geocode-data install-api-geocode-indexer install-api-geocode-searcher
 
 # Install/download data for the geocode API.
-install-api-geocode-data:
+install-api-geocode-data: install-api-geocode-indexer
 	cd source/api/geocode && \
 		curl -L {{geocode_data_planet}} > planet.tsv.gz && \
-		gzip -d planet.tsv.gz
+		gzip -d planet.tsv.gz && \
+		mkdir index && \
+		./indexer/target/release/atlasr-api-geocode-indexer --source-file planet.tsv --index-directory index
 
 # Install the indexer for the geocode API.
 install-api-geocode-indexer:
