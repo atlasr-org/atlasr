@@ -1,4 +1,4 @@
-mapbox_gl_js_version = "0.44.1"
+mapbox_gl_js_version = "0.50.0"
 server_address = "localhost:8889"
 geocode_api_address = "localhost:8990"
 route_api_address = "localhost:8989"
