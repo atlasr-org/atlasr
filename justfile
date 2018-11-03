@@ -102,7 +102,15 @@ uninstall-client-index:
 
 # Compile the Elm application to JS.
 install-client-application:
-	cd source/client && elm-make src/Main.elm --output ../../public/static/javascript/application.elm.js
+	cd source/client && elm make src/Main.elm --optimize --output ../../public/static/javascript/application.elm.js
+	cd public/static/javascript && \
+		uglifyjs application.elm.js \
+			--compress 'pure_funcs="F2,F3,F4,F5,F6,F7,F8,F9,A2,A3,A4,A5,A6,A7,A8,A9",pure_getters,keep_fargs=false,unsafe_comps,unsafe' | \
+		uglifyjs \
+			--mangle \
+			--output=application.min.elm.js && \
+		gzip --best --stdout application.min.elm.js > application.min.elm.js.gz && \
+		brotli --best --stdout application.min.elm.js > application.min.elm.js.br
 
 # Test the Elm application.
 test-client-application:
@@ -120,9 +128,16 @@ uninstall-client-dependencies: uninstall-mapbox-gl-js
 
 # Install Mapbox GL JS, so JS, CSS and SourceMap.
 install-mapbox-gl-js:
-	curl -L https://api.tiles.mapbox.com/mapbox-gl-js/v{{mapbox_gl_js_version}}/mapbox-gl.js > public/static/javascript/mapbox-gl.js
-	curl -L https://api.tiles.mapbox.com/mapbox-gl-js/v{{mapbox_gl_js_version}}/mapbox-gl.js.map > public/static/javascript/mapbox-gl.js.map
-	curl -L https://api.tiles.mapbox.com/mapbox-gl-js/v{{mapbox_gl_js_version}}/mapbox-gl.css > public/static/css/mapbox-gl.css
+	cd public/static/javascript/ && \
+		curl -L https://api.tiles.mapbox.com/mapbox-gl-js/v{{mapbox_gl_js_version}}/mapbox-gl.js > mapbox-gl.js && \
+		curl -L https://api.tiles.mapbox.com/mapbox-gl-js/v{{mapbox_gl_js_version}}/mapbox-gl.js.map > mapbox-gl.js.map && \
+		curl -L https://api.tiles.mapbox.com/mapbox-gl-js/v{{mapbox_gl_js_version}}/mapbox-gl.css > mapbox-gl.css && \
+		uglifyjs \
+			--compress \
+			--mangle \
+			--output=mapbox-gl.min.js mapbox-gl.js && \
+		gzip --best --stdout mapbox-gl.min.js > mapbox-gl.min.js.gz && \
+		brotli --best --stdout mapbox-gl.min.js > mapbox-gl.min.js.br
 
 # Uninstall Mapbox GL JS.
 uninstall-mapbox-gl-js:

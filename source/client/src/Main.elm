@@ -1,12 +1,12 @@
-module Atlasr.Main exposing (..)
+module Atlasr.Main exposing (Model, Msg(..), init, main, subscriptions, update, view)
 
+import Array exposing (Array)
 import Atlasr.Geocode as Geocode
 import Atlasr.Map as Map
 import Atlasr.MapboxGL.Options as MapOptions
-import Atlasr.Position as Position
-import Atlasr.Position exposing (Position, NamedPosition)
+import Atlasr.Position as Position exposing (NamedPosition, Position)
 import Atlasr.Route as Route
-import Array exposing (Array)
+import Browser
 import Html exposing (..)
 import Html.Attributes exposing (..)
 import Html.Attributes.Aria exposing (..)
@@ -17,7 +17,7 @@ import Task as CoreTask
 
 
 main =
-    program
+    Browser.document
         { init = init
         , view = view
         , update = update
@@ -29,14 +29,14 @@ type alias Model =
     { positions : Array NamedPosition }
 
 
-init : ( Model, Cmd Msg )
-init =
+init : Int -> ( Model, Cmd Msg )
+init x =
     ( { positions = Array.repeat 2 Position.defaultNamedPosition }
     , Map.create "map" MapOptions.default
     )
 
 
-view : Model -> Html Msg
+view : Model -> Browser.Document Msg
 view model =
     let
         hasAtLeastOnePositionName =
@@ -46,10 +46,13 @@ view model =
         expandedNav =
             if hasAtLeastOnePositionName then
                 "true"
+
             else
                 "false"
     in
-        main_ []
+    { title = "Atlasr"
+    , body =
+        [ main_ []
             [ nav
                 [ ariaExpanded expandedNav ]
                 [ Html.form [ role "search", onSubmit Search ]
@@ -90,6 +93,8 @@ view model =
             , article [ id "map" ] []
             , footer [] [ text "Atlasr" ]
             ]
+        ]
+    }
 
 
 type Msg
@@ -114,7 +119,7 @@ update msg model =
                 positions =
                     Array.set index ( positionName, Position.defaultPosition ) model.positions
             in
-                ( { model | positions = positions }, Cmd.none )
+            ( { model | positions = positions }, Cmd.none )
 
         GeoencodePositionNames positionsToGeocode ->
             ( model, Geocode.toGeocodes NewPositionGeocodes positionsToGeocode )
@@ -126,7 +131,7 @@ update msg model =
 
                 namedPositions =
                     List.map
-                        (\geocode ->
+                        (\geocode_item ->
                             Maybe.map
                                 (\geocode ->
                                     let
@@ -134,13 +139,13 @@ update msg model =
                                             geocode.label
 
                                         position =
-                                            ( String.toFloat geocode.longitude |> Result.withDefault defaultLongitude
-                                            , String.toFloat geocode.latitude |> Result.withDefault defaultLatitude
+                                            ( Maybe.withDefault defaultLongitude (String.toFloat geocode.longitude)
+                                            , Maybe.withDefault defaultLatitude (String.toFloat geocode.latitude)
                                             )
                                     in
-                                        ( positionName, position )
+                                    ( positionName, position )
                                 )
-                                geocode
+                                geocode_item
                         )
                         geocodes
 
@@ -154,20 +159,20 @@ update msg model =
                         )
                         namedPositions
             in
-                update
-                    (Chain [ AddMarkers positions, GetRoute positions ])
-                    { model
-                        | positions =
-                            List.map
-                                (\namedPosition ->
-                                    Maybe.withDefault Position.defaultNamedPosition namedPosition
-                                )
-                                namedPositions
-                                |> Array.fromList
-                    }
+            update
+                (Chain [ AddMarkers positions, GetRoute positions ])
+                { model
+                    | positions =
+                        List.map
+                            (\namedPosition ->
+                                Maybe.withDefault Position.defaultNamedPosition namedPosition
+                            )
+                            namedPositions
+                            |> Array.fromList
+                }
 
         NewPositionGeocodes (Err _) ->
-            Debug.crash "[geocode] hooo"
+            ( model, Cmd.batch [] )
 
         GetRoute positions ->
             ( model, Route.toRoute NewPositionRoute positions )
@@ -178,7 +183,7 @@ update msg model =
                 model
 
         NewPositionRoute (Err _) ->
-            Debug.crash "[route] hooo"
+            ( model, Cmd.batch [] )
 
         Search ->
             update
@@ -204,9 +209,9 @@ update msg model =
                         ( nextModel, nextCommands ) =
                             update message model
                     in
-                        nextModel ! [ commands, nextCommands ]
+                    ( nextModel, Cmd.batch [ commands, nextCommands ] )
             in
-                List.foldl chain (model ! []) messages
+            List.foldl chain ( model, Cmd.batch [] ) messages
 
 
 subscriptions : Model -> Sub Msg

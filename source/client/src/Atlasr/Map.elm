@@ -1,8 +1,8 @@
-module Atlasr.Map exposing (..)
+module Atlasr.Map exposing (addMarkers, connectMarkers, create, flyTo, removeMarkers)
 
-import Atlasr.Position exposing (Position)
 import Atlasr.MapboxGL.Options as Options
 import Atlasr.MapboxGL.Ports exposing (..)
+import Atlasr.Position exposing (Position)
 
 
 {-| Create a map with an ID and some options.

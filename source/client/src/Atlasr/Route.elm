@@ -4,6 +4,7 @@ import Atlasr.Position exposing (Position)
 import Http
 import Json.Decode
 import Task
+import Url.Builder exposing (absolute, string)
 
 
 type alias Route =
@@ -35,6 +36,7 @@ toRoute outputType positions =
         task =
             if List.length positions <= 1 then
                 Task.succeed emptyRoute
+
             else
                 positionsToRouteRequest positions
                     |> Http.toTask
@@ -49,7 +51,7 @@ toRoute outputType positions =
                                 )
                         )
     in
-        Task.attempt outputType task
+    Task.attempt outputType task
 
 
 {-| Create an HTTP request to get the route between positions.
@@ -58,21 +60,23 @@ positionsToRouteRequest : List Position -> Http.Request RawRoute
 positionsToRouteRequest positions =
     let
         url =
-            "/api/route"
-                ++ "?points_encoded=false"
-                ++ "&vehicle=car"
-                ++ List.foldl
-                    (\position acc ->
-                        let
-                            ( longitude, latitude ) =
-                                position
-                        in
-                            acc ++ "&point=" ++ (Http.encodeUri ((toString latitude) ++ "," ++ (toString longitude)))
-                    )
-                    ""
-                    positions
+            absolute
+                [ "api/route" ]
+                ([ string "points_encoded" "false"
+                 , string "vehicle" "car"
+                 ]
+                    ++ List.map
+                        (\position ->
+                            let
+                                ( longitude, latitude ) =
+                                    position
+                            in
+                            string "point" (String.fromFloat latitude ++ "," ++ String.fromFloat longitude)
+                        )
+                        positions
+                )
     in
-        Http.get url decodeRoute
+    Http.get url decodeRoute
 
 
 {-| Decoder for the route payload from the HTTP service.

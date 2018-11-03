@@ -1,4 +1,4 @@
-port module Atlasr.MapboxGL.Ports exposing (..)
+port module Atlasr.MapboxGL.Ports exposing (mapboxgl_add_markers, mapboxgl_connect_markers, mapboxgl_create_map, mapboxgl_fly_to, mapboxgl_remove_markers)
 
 import Atlasr.MapboxGL.Options as Options
 import Atlasr.Position exposing (Position)

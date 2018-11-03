@@ -1,6 +1,9 @@
 (
     () => {
-        const atlasr                     = Elm.Atlasr.Main.fullscreen();
+        const atlasr = Elm.Atlasr.Main.init({
+            node: document.body,
+            flags: 1
+        });
         const LAYER_ROUTE_MARKERS_PREFIX = 'markers-';
         let   map                        = null;
         let   layer_route_markers        = '';

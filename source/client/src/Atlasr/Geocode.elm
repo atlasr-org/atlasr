@@ -29,6 +29,7 @@ toGeocodes outputType positionsToGeocode =
                             positionToGeocodeRequest positionName
                                 |> Http.toTask
                                 |> Task.map (\geocode -> Just geocode)
+
                         else
                             let
                                 ( longitude, latitude ) =
@@ -36,17 +37,18 @@ toGeocodes outputType positionsToGeocode =
 
                                 geocode =
                                     { label = positionName
-                                    , longitude = toString longitude
-                                    , latitude = toString latitude
+                                    , longitude = String.fromFloat longitude
+                                    , latitude = String.fromFloat latitude
                                     }
                             in
-                                Task.succeed (Just geocode)
+                            Task.succeed (Just geocode)
+
                     else
                         Task.succeed Nothing
                 )
                 positionsToGeocode
     in
-        Task.attempt outputType <| Task.sequence tasks
+    Task.attempt outputType <| Task.sequence tasks
 
 
 {-| Create an HTTP request to geocode a position.
@@ -57,7 +59,7 @@ positionToGeocodeRequest positionName =
         url =
             "/api/geocode?term=" ++ positionName ++ "&limit=1"
     in
-        Http.get url decodeGeocode
+    Http.get url decodeGeocode
 
 
 {-| Decoder for the geocode payload from the HTTP service.

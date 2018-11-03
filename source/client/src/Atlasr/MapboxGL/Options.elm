@@ -1,4 +1,4 @@
-module Atlasr.MapboxGL.Options exposing (..)
+module Atlasr.MapboxGL.Options exposing (Camera, Map, default)
 
 import Atlasr.Position exposing (Position)
 

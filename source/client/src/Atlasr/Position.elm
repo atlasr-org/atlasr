@@ -1,4 +1,4 @@
-module Atlasr.Position exposing (..)
+module Atlasr.Position exposing (Latitude, Longitude, NamedPosition, Position, defaultName, defaultNamedPosition, defaultPosition, extractLatitude, extractLongitude)
 
 
 type alias Longitude =
