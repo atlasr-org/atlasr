@@ -16,6 +16,7 @@ use std::str::FromStr;
 mod schema;
 mod models;
 
+const SERVER_ADDRESS: &'static str = env!("SERVER_ADDRESS");
 const TILE_API_ADDRESS: &'static str = env!("TILE_API_ADDRESS");
 
 fn not_found() -> http::Result<http::Response<Vec<u8>>> {
@@ -130,6 +131,21 @@ fn main() {
                                         if let Ok(map_value) = map_value {
                                             output.insert(metadatum.name, map_value);
                                         }
+                                    }
+
+                                    if !output.contains_key("tilejson") {
+                                        output.insert("tilejson".to_string(), json::Value::String("2.0.0".to_string()));
+                                    }
+
+                                    if !output.contains_key("tiles") {
+                                        output.insert(
+                                            "tiles".to_string(),
+                                            json::Value::Array(vec![
+                                                json::Value::String(
+                                                    format!("http://{}/api/tile/{{z}}/{{x}}/{{y}}", SERVER_ADDRESS)
+                                                )
+                                            ])
+                                        );
                                     }
 
                                     http::Response::builder()

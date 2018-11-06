@@ -87,6 +87,7 @@ run-api-route map_file='europe_switzerland': install-api-route
 # Install the tile API.
 install-api-tile:
 	cd source/api/tile && \
+		SERVER_ADDRESS={{server_address}} \
 		TILE_API_ADDRESS={{tile_api_address}} \
 		cargo build --release
 

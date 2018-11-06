@@ -2,3 +2,6 @@
 	path = source/api/route
 	url = https://github.com/atlasr-org/graphhopper
 	branch = master
+[submodule "source/map-style"]
+	path = source/map-style
+	url = https://github.com/atlasr-org/osm-liberty
