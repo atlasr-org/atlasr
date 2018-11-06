@@ -112,7 +112,7 @@ uninstall-client: uninstall-client-index uninstall-client-application
 
 # Create a public `index.html` file.
 install-client-index:
-	cp source/client/index.html public/static/index.html
+	cp source/client/src/index.html public/static/index.html
 	sed -i '' "s@{MAP-PLACEHOLDER.svg}@`cat public/static/image/map-placeholder.svg | sed -E 's/^ +//g; s/"/'"'"'/g; s/</%3c/g; s/>/%3e/g; s/\#/%23/g' | tr -d "\n"`@" public/static/index.html
 
 # Remove the public `index.html` file.
