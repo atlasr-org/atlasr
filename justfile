@@ -24,6 +24,7 @@ install-server:
 		SERVER_ADDRESS={{server_address}} \
 		ROUTE_API_ADDRESS={{route_api_address}} \
 		GEOCODE_API_ADDRESS={{geocode_api_address}} \
+		TILE_API_ADDRESS={{tile_api_address}} \
 		cargo build --release
 
 # Test the HTTP server.

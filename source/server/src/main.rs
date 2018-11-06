@@ -20,6 +20,7 @@ const STATIC_DIRECTORY: &'static str = concat!(ROOT_DIRECTORY!(), "static/");
 const SERVER_ADDRESS: &'static str = env!("SERVER_ADDRESS");
 const ROUTE_API_ADDRESS: &'static str = env!("ROUTE_API_ADDRESS");
 const GEOCODE_API_ADDRESS: &'static str = env!("GEOCODE_API_ADDRESS");
+const TILE_API_ADDRESS: &'static str = env!("TILE_API_ADDRESS");
 
 fn serve_static_files(request: HttpRequest) -> Result<NamedFile> {
     let mut path: PathBuf = PathBuf::from(STATIC_DIRECTORY);
@@ -49,6 +50,24 @@ fn serve_api_geocode(request: HttpRequest) -> impl Future<Item=HttpResponse, Err
 fn serve_api_route(request: HttpRequest) -> impl Future<Item=HttpResponse, Error=client::SendRequestError> {
     client
         ::get(format!("http://{}/route?{}", ROUTE_API_ADDRESS, request.query_string()))
+        .finish()
+        .unwrap()
+        .send()
+        .map(
+            |client_response| {
+                HttpResponseBuilder
+                    ::from(&client_response)
+                    .chunked()
+                    .streaming(client_response)
+            }
+        )
+}
+
+fn serve_api_tile(request: HttpRequest) -> impl Future<Item=HttpResponse, Error=client::SendRequestError> {
+    let tail = request.match_info().get("tail").unwrap_or("");
+
+    client
+        ::get(format!("http://{}/{}", TILE_API_ADDRESS, tail))
         .finish()
         .unwrap()
         .send()
@@ -96,6 +115,12 @@ fn main() {
                             "/route",
                             |resource| {
                                 resource.method(Method::GET).a(serve_api_route)
+                            }
+                        )
+                        .resource(
+                            "/tile/{tail:.*}",
+                            |resource| {
+                                resource.method(Method::GET).a(serve_api_tile)
                             }
                         ),
 
