@@ -6,6 +6,8 @@
 /source/api/geocode/index/
 /source/api/geocode/indexer/target/
 /source/api/geocode/searcher/target/
+/source/api/tile/target/
+/source/api/tile/database/*.mbtiles
 /source/client/elm-stuff
 /source/client/tests/elm-stuff
 /source/server/target

@@ -3,6 +3,7 @@ server_address = "localhost:8889"
 geocode_api_address = "localhost:8990"
 route_api_address = "localhost:8989"
 geocode_data_planet = "https://github.com/OSMNames/OSMNames/releases/download/v2.0.4/planet-latest_geonames.tsv.gz"
+tile_api_address = "127.0.0.1:8991"
 
 # Open Atlasr in your favorite browser.
 open: install
@@ -38,7 +39,7 @@ run-server: install-server
 	cd source/server && cargo run --release
 
 # Install all the APIs.
-install-api: install-api-geocode install-api-route
+install-api: install-api-geocode install-api-route install-api-tile
 
 # Uninstall all the APIs.
 uninstall-api: uninstall-api-geocode uninstall-api-route
@@ -81,6 +82,24 @@ uninstall-api-route:
 # Run the route API (GraphHopper) for a particular PBF zone.
 run-api-route map_file='europe_switzerland': install-api-route
 	cd source/api/route && ./graphhopper.sh web {{map_file}}.pbf
+
+# Install the tile API.
+install-api-tile:
+	cd source/api/tile && \
+		TILE_API_ADDRESS={{tile_api_address}} \
+		cargo build --release
+
+# Run the tile API.
+run-api-tile:
+	cd source/api/tile && cargo run --release
+
+# Uninstall the tile API.
+uninstall-api-tile:
+	# noop
+
+#run-api-tile map_file='europe_switzerland': install-api-tile
+#	cd source/api/tile && \
+#		curl -L 'https://openmaptiles.com/download/WyJjOWUzNGM1NS04MDQxLTQ4MTMtYmUzMy0yNmFjMGUyN2I5MWIiLCItMSIsODcxM10.DsGknA.wk4qsZRjBSL8gQrp22h2CRpCyi4/osm-2017-07-03-v3.6.1-{{map_file}}.mbtiles?usage=open-source' > database/{{map_file}}.mbtiles
 
 # Install client.
 install-client: install-client-index install-client-application install-client-dependencies
