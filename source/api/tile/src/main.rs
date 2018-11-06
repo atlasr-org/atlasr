@@ -139,6 +139,14 @@ fn main() {
                                         }
                                     }
 
+                                    if !output.contains_key("profile") {
+                                        output.insert("profile".to_string(), json::Value::String("mercator".to_string()));
+                                    }
+
+                                    if !output.contains_key("scale") {
+                                        output.insert("scale".to_string(), json::Value::Number(json::Number::from_f64(1.0).unwrap()));
+                                    }
+
                                     if !output.contains_key("tilejson") {
                                         output.insert("tilejson".to_string(), json::Value::String("2.0.0".to_string()));
                                     }
