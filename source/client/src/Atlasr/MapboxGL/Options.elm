@@ -22,7 +22,7 @@ type alias Map =
 
 default : Map
 default =
-    { style = "https://openmaptiles.github.io/osm-bright-gl-style/style-cdn.json"
+    { style = "/static/map-style/style.json"
     , center = ( 2.294504285127, 48.858262790681 )
     , zoom = 15
     , hash = True
