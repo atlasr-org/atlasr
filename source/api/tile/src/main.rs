@@ -44,21 +44,27 @@ fn main() {
     let pool1 = pool.clone();
     let pool2 = pool.clone();
 
-    // `GET /<zoom>/<tile_column>/<tile_row>/`
+    // `GET /<zoom_level>/<tile_column>/<tile_row>/`
     let tiles =
         path!(u8 / u16 / u16)
             .map(
-                move |z, c, r| {
+                move |z, x, y| {
                     match pool1.get() {
                         Ok(connection) => {
                             use schema::tiles::dsl::*;
                             use models::Tiles;
 
+                            let x = x as u32;
+                            let y = y as u32;
+                            let z = z as u32;
+
+                            let y = 2u32.pow(z) - 1 - y;
+
                             let tile =
                                 tiles
                                     .filter(zoom_level.eq(z as i32))
-                                    .filter(tile_column.eq(c as i32))
-                                    .filter(tile_row.eq(r as i32))
+                                    .filter(tile_column.eq(x as i32))
+                                    .filter(tile_row.eq(y as i32))
                                     .first::<Tiles>(&*connection);
 
                             match tile {
