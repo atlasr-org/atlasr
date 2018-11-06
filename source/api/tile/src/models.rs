@@ -5,3 +5,9 @@ pub struct Tiles {
     pub tile_row: i32,
     pub tile_data: Vec<u8>,
 }
+
+#[derive(Debug, Queryable)]
+pub struct Metadata {
+    pub name: String,
+    pub value: String
+}

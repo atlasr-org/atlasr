@@ -6,3 +6,10 @@ table! {
         tile_data -> Binary,
     }
 }
+
+table! {
+    metadata (name, value) {
+        name -> Text,
+        value -> Text,
+    }
+}
