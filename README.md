@@ -44,7 +44,7 @@ constraints. The previous list is a high overview of how it works.
 
 ## Goals
 
-The map open-source ecosystem is mature. Many projects already exist
+The open-source map ecosystem is mature. Many projects already exist
 to address one component of the map architecture. However, a
 mainstream tool that combined all these projects, based on 100%
 open-source and free data, is still missing. Atlasr aims to be the
