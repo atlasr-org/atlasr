@@ -5,20 +5,21 @@ Atlasr is a truly open-source and free map browser. The goal is threefold:
   1. Learn about all the layers and components that make a map,
   2. Provide a ready-to-use set of tools to build a 100% open-source,
      free, and standalone map browser,
-  3. Provide an alternative service to the famous [Google Maps][GMaps], with no
-     ads, with respect of user privacy, with 100% open-source and
-     free data, and the top 10 features of Google Maps.
+  3. Provide an alternative service to the famous [Google Maps][GMaps]
+     or [Apple Maps][AMAps], with no ads, with respect to user privacy,
+     with 100% open-source and free data, and the top 10 features of
+     Google Maps.
 
 A map architecture is composed of the following components:
 
-  * **Map data**, A giant database containing all informations about
-    roads, trails, cafés, railway stations, buildings etc. The most
+  * **Map data**, A giant database containing all information about
+    roads, trails, cafés, railway stations, buildings etc. The biggest
     major project is [OpenStreetMap][OSM],
   * **Tile server**, A program that, given a specific region, reads
     the map database and compiles those information in a certain
     format like [`.mbtiles`][MBtiles] for instance. Each region of a
     planet is named a _tile_. A tile is defined by a longitude, a
-    latitude, and a zoom (altitude).
+    latitude, and a zoom (an altitude scale),
   * **Map renderer**, A program that, given a set of tiles,
     renders/draws a map, so each roads, buildings etc. finally come
     alive at this step. A map renderer requires at least the following
@@ -26,11 +27,11 @@ A map architecture is composed of the following components:
       * **Tile decoder** to decode the tiles received from the tile
         server,
       * **Styles** to know how to draw the data from the map
-        (e.g. “road must be blue with a white strike”),
+        (e.g. “roads must be blue with a white strike”),
       * **Fonts** to render texts,
       * **Icons** to represent some places with an image (like
         hospitals, police stations, parcs etc.).
-  * **Geocoding**, A program that can find the longitude, latitude and
+  * **Geocoding**, A program that can find the longitude and the
     latitude of a labellised element on earth, like a postal address,
     a building name, or a river name for examples,
   * **Routing**, A program that is able to find a path/route between
@@ -50,7 +51,7 @@ mainstream tool that combined all these projects, based on 100%
 open-source and free data, is still missing. Atlasr aims to be the
 response to this problem.
 
-The quality must be comparable with Google Maps:
+The quality must be comparable with Google Maps or Apple Maps:
 
   * Smooth and fast experience,
   * Reliable data,
@@ -118,7 +119,7 @@ addressed except the fonts in the map renderer (yet).
   
     ![Geocoding and routing](./documentation/images/routing.jpg)
 
-## Usages
+## Usages/Installations
 
 [`just`] is required to run all the commands. Run `just --list` to get an overview of all the commands.
 
@@ -178,6 +179,7 @@ The entire project is under the BSD-3-Clause license. Please read the
 [OSM]: https://openstreetmap.org/ 
 [MBTiles]: https://github.com/mapbox/mbtiles-spec
 [GMaps]: https://google.com/maps
+[AMaps]: https://maps.apple.com/
 [Rust]: https://rust-lang.org/
 [Elm]: https://elm-lang.org/
 [PostgreSQL]: https://www.postgresql.org/
