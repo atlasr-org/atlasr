@@ -99,9 +99,9 @@ run-api-tile:
 uninstall-api-tile:
 	# noop
 
-#run-api-tile map_file='europe_switzerland': install-api-tile
-#	cd source/api/tile && \
-#		curl -L 'https://openmaptiles.com/download/WyJjOWUzNGM1NS04MDQxLTQ4MTMtYmUzMy0yNmFjMGUyN2I5MWIiLCItMSIsODcxM10.DsGknA.wk4qsZRjBSL8gQrp22h2CRpCyi4/osm-2017-07-03-v3.6.1-{{map_file}}.mbtiles?usage=open-source' > database/{{map_file}}.mbtiles
+download-api-tile map_file='europe_switzerland': install-api-tile
+	cd source/api/tile && \
+	curl -L 'https://openmaptiles.com/download/WyJjOWUzNGM1NS04MDQxLTQ4MTMtYmUzMy0yNmFjMGUyN2I5MWIiLCItMSIsODcxM10.DsGknA.wk4qsZRjBSL8gQrp22h2CRpCyi4/osm-2017-07-03-v3.6.1-{{map_file}}.mbtiles?usage=open-source' > database/{{map_file}}.mbtiles
 
 # Install client.
 install-client: install-client-index install-client-application install-client-dependencies
