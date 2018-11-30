@@ -149,10 +149,11 @@ uninstall-client-dependencies: uninstall-mapbox-gl-js
 
 # Install Mapbox GL JS, so JS, CSS and SourceMap.
 install-mapbox-gl-js:
+	cd public/static/css/ && \
+		curl -L https://api.tiles.mapbox.com/mapbox-gl-js/v{{mapbox_gl_js_version}}/mapbox-gl.css > mapbox-gl.css && \
 	cd public/static/javascript/ && \
 		curl -L https://api.tiles.mapbox.com/mapbox-gl-js/v{{mapbox_gl_js_version}}/mapbox-gl.js > mapbox-gl.js && \
 		curl -L https://api.tiles.mapbox.com/mapbox-gl-js/v{{mapbox_gl_js_version}}/mapbox-gl.js.map > mapbox-gl.js.map && \
-		curl -L https://api.tiles.mapbox.com/mapbox-gl-js/v{{mapbox_gl_js_version}}/mapbox-gl.css > mapbox-gl.css && \
 		uglifyjs \
 			--compress \
 			--mangle \
