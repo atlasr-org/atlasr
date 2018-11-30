@@ -53,7 +53,7 @@ install-api-geocode-data: install-api-geocode-indexer
 	cd source/api/geocode && \
 		curl -L {{geocode_data_planet}} > planet.tsv.gz && \
 		gzip -d planet.tsv.gz && \
-		mkdir index && \
+		mkdir -p index && \
 		./indexer/target/release/atlasr-api-geocode-indexer --source-file planet.tsv --index-directory index
 
 # Install the indexer for the geocode API.
