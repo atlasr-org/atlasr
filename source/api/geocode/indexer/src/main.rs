@@ -37,7 +37,7 @@ struct Record {
     #[serde(rename = "lat")]
     latitude: Option<f64>,
     place_rank: Option<u64>,
-    importance: f64,
+    importance: Option<f64>,
     street: Option<String>,
     city: Option<String>,
     county: Option<String>,
