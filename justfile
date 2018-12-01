@@ -1,3 +1,5 @@
+# vim: filetype=just
+
 mapbox_gl_js_version = "0.50.0"
 server_address = "localhost:8889"
 geocode_api_address = "localhost:8990"
