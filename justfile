@@ -52,8 +52,8 @@ install-api-geocode: install-api-geocode-data install-api-geocode-indexer instal
 install-api-geocode-data: install-api-geocode-indexer
 	cd source/api/geocode && \
 		curl -L {{geocode_data_planet}} > planet.tsv.gz && \
-		gzip -d planet.tsv.gz && \
-		mkdir index && \
+		gzip -df planet.tsv.gz && \
+		mkdir -p index && \
 		./indexer/target/release/atlasr-api-geocode-indexer --source-file planet.tsv --index-directory index
 
 # Install the indexer for the geocode API.
@@ -142,17 +142,16 @@ uninstall-client-application:
 	rm -f public/static/javascript/application.elm.js
 
 # Install client dependencies.
-install-client-dependencies: install-mapbox-gl-js
+install-client-dependencies: install-mapbox-gl-js install-mapbox-gl-css
 
 # Uninstall client dependencies.
-uninstall-client-dependencies: uninstall-mapbox-gl-js
+uninstall-client-dependencies: uninstall-mapbox-gl-js uninstall-mapbox-gl-css
 
-# Install Mapbox GL JS, so JS, CSS and SourceMap.
+# Install Mapbox GL JS, so JS and SourceMap.
 install-mapbox-gl-js:
 	cd public/static/javascript/ && \
 		curl -L https://api.tiles.mapbox.com/mapbox-gl-js/v{{mapbox_gl_js_version}}/mapbox-gl.js > mapbox-gl.js && \
 		curl -L https://api.tiles.mapbox.com/mapbox-gl-js/v{{mapbox_gl_js_version}}/mapbox-gl.js.map > mapbox-gl.js.map && \
-		curl -L https://api.tiles.mapbox.com/mapbox-gl-js/v{{mapbox_gl_js_version}}/mapbox-gl.css > mapbox-gl.css && \
 		uglifyjs \
 			--compress \
 			--mangle \
@@ -160,10 +159,18 @@ install-mapbox-gl-js:
 		gzip --best --stdout mapbox-gl.min.js > mapbox-gl.min.js.gz && \
 		brotli --best --stdout mapbox-gl.min.js > mapbox-gl.min.js.br
 
+# Install Mapbox GL CSS
+install-mapbox-gl-css:
+	cd public/static/css/ && \
+		curl -L https://api.tiles.mapbox.com/mapbox-gl-js/v{{mapbox_gl_js_version}}/mapbox-gl.css > mapbox-gl.css 
+
 # Uninstall Mapbox GL JS.
 uninstall-mapbox-gl-js:
 	rm public/static/javascript/mapbox-gl.js
 	rm public/static/javascript/mapbox-gl.js.map
+
+# Uninstall Mapbox GL CSS.
+uninstall-mapbox-gl-css:
 	rm public/static/css/mapbox-gl.css
 
 # Local Variables:
