@@ -115,9 +115,15 @@ test-client: test-client-application
 uninstall-client: uninstall-client-index uninstall-client-application
 
 # Create a public `index.html` file.
+SED_INPLACE_OPTION = "\"s@{MAP-PLACEHOLDER.svg}@`cat public/static/image/map-placeholder.svg | sed -E 's/^ +//g; s/\"/'\"'\"'/g; s/</%3c/g; s/>/%3e/g; s/\\#/%23/g' | tr -d \"\\n\"`@\""
 install-client-index:
+	#!/bin/sh
 	cp source/client/src/index.html public/static/index.html
-	sed -i '' "s@{MAP-PLACEHOLDER.svg}@`cat public/static/image/map-placeholder.svg | sed -E 's/^ +//g; s/"/'"'"'/g; s/</%3c/g; s/>/%3e/g; s/\#/%23/g' | tr -d "\n"`@" public/static/index.html
+	if [[ "$OSTYPE" == "darwin"* ]]; then
+		sed -i '' {{SED_INPLACE_OPTION}}  public/static/index.html
+	else
+		sed -i {{SED_INPLACE_OPTION}} public/static/index.html
+	fi
 
 # Remove the public `index.html` file.
 uninstall-client-index:
